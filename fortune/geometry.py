@@ -57,7 +57,8 @@ def intersection(p,q,directrix):
 	#print 'intersection', p, q, directrix
 	if p[Y] == q[Y]:
 		x = (p[X] + q[X]) / 2.0
-		parabola = (a,b,c)
+		#print 'intersection', x,p[Y]
+		return x,p[Y]
 	elif q[Y] == directrix:
 		x = q[X]
 		parabola = (a,b,c)

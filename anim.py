@@ -65,13 +65,14 @@ def plot_parabola(focus,directrix, endpoints=None,pts=pylab.linspace(-10, width,
 	#v = vertex(a,b,directrix)
 	#plt.plot(v[0],v[1], 'bo',color=c)
 	# Plot the parabola
+	#print 'plot_parabola', focus, directrix, endpoints
 	if focus[Y] == directrix:
 		if endpoints[0]:
 			end = endpoints[0][Y]
 		elif endpoints[1]:
 			end = endpoints[1][Y]
 		else:
-			end = directrix
+			end = height
 		
 		plt.plot([a,a],[directrix,end],'b-',color=color,linewidth=2)
 	else:
@@ -122,18 +123,19 @@ def animate(self,e,draw_bottoms=True, draw_circles=False):
 		#print '\t', arc, arc.prev, arc.next
 		end,start=None,None
 		# plot intersections
-		if arc.prev:
+		if arc.prev and arc.prev.point[Y] != e.point[Y]:
 			start = intersection(arc.prev.point,arc.point,e.point[Y])
 			#plt.plot(start[0],start[1],'o',color='red')
-		if arc.next:
+		if arc.next and arc.next.point[Y] != e.point[Y]:
 			end = intersection(arc.point,arc.next.point,e.point[Y])
 			#plt.plot(end[0],end[1],'o',color='red')
 		plot_parabola(arc.point,e.point[Y],endpoints=[start,end],color='purple')
 		#print '\t\tstart = ',start,'end = ',end
 
+
 	#print 'edges:'
 	for h in self.edges:
-		#print '\t', h, h.origin, h.current(e.point[Y])
+		print '\t', h, h.origin, h.current(e.point[Y])
 		plot_line(h.origin, h.current(e.point[Y]), color='blue')
 
 	if not e.is_site:
@@ -165,6 +167,8 @@ def animate(self,e,draw_bottoms=True, draw_circles=False):
 	#plot_vertical(e.point[X])
 	plot_directrix(e.point[Y])
 	plot_points(self.input)
+	if e.is_site:
+		plot_points([e.point], color='black')
 	
 	fig.savefig(filename, bbox_inches='tight')
 	print '============================'
