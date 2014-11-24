@@ -57,6 +57,7 @@ def intersection(p,q,directrix):
 	#print 'intersection', p, q, directrix
 	if p[Y] == q[Y]:
 		x = (p[X] + q[X]) / 2.0
+		parabola = (a,b,c)
 	elif q[Y] == directrix:
 		x = q[X]
 		parabola = (a,b,c)
@@ -90,6 +91,7 @@ def circle(a,b,c):
 	radius = sqrt((a[X] - center[X])**2 + (a[Y] - center[Y])**2)
 	bottom = center[X], center[Y] - radius
 
+	#print 'circle through', a,b,c
 	return bottom, center
 
 def euclidean_distance(p,q):

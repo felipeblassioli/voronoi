@@ -99,9 +99,12 @@ from fortune.geometry import intersection, circle, euclidean_distance as dist, s
 
 
 i=1
-def animate(self,e,draw_bottoms=True):
+circles = []
+past_circle_events = []
+def animate(self,e,draw_bottoms=True, draw_circles=False):
 	global i
 	global circles
+	global past_circle_events
 
 	filename = 'tmp-{0:03}.png'.format(i)
 	plt.clf()
@@ -133,13 +136,27 @@ def animate(self,e,draw_bottoms=True):
 		#print '\t', h, h.origin, h.current(e.point[Y])
 		plot_line(h.origin, h.current(e.point[Y]), color='blue')
 
+	if not e.is_site:
+		bottom, center = e.point, e.center
+		radius = dist(center,bottom)
+		circle=plt.Circle(center,radius,color='b',fill=False)
+		fig.gca().add_artist(circle)
+
+		past_circle_events.append(e)
+
+	for e in past_circle_events:
+		plot_points([e.point], color='green')
+
 	for evt in self.Q:
 		# Circle Event
 		if not evt.is_site:
 			bottom, center = evt.point, evt.center
-			# radius = dist(center,bottom)
-			# circle=plt.Circle(center,radius,color='b',fill=False)
-			# fig.gca().add_artist(circle)
+			print 'Circle', bottom, center
+			#if same_point(evt.point, e.point):
+			if draw_circles:
+				radius = dist(center,bottom)
+				circle=plt.Circle(center,radius,color='b',fill=False)
+				fig.gca().add_artist(circle)
 
 			# plot_points([center,bottom], color='green')
 			if draw_bottoms and bottom:

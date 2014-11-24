@@ -10,7 +10,18 @@ if __name__ == '__main__':
 	label = ['a','b','c','d','e','f']
 	# x = [4,3,11]
 	# y = [12,3,6]
+	# label = ['a','b','c']parabola = (a,b,c)
+
+	# Two colinear points
+	# x = [4,8,11]
+	# y = [12,11,11]
 	# label = ['a','b','c']
+
+	# Three colinear points
+	# x = [4,8,11,14]
+	# y = [12,11,11,11]
+	# label = ['a','b','c','d']
+
 	#x = [4,8,11,5]
 	#y = [12,11,10,6.5]
 	#label = ['a','b','c','d']
