@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 
+class Arc(object):
+	def __init__(self, point=None):
+		self.point = point
+		# The node in the event queue that represents the circle event in which this event will disappear
+		self.circle_event = None
+
+	def __str__(self):
+		return "Arc(point=[{}])".format(self.point)
+
 class BeachLine(object):
 	"""
 	Beach line: The beach line is represented using a dictionary
@@ -57,7 +66,7 @@ class BeachLine(object):
 	def delete(self, arc):
 		raise NotImplementedError()
 
-	def insert(self, arc, within=None):
+	def insert(self, p, within=None):
 		"""Insert an new arc pi within a given arc pj,
 		thus splitting the arc for pj into two. This creates three
 		arcs, pj, pi, and pj.
@@ -83,10 +92,8 @@ def intersect(p, node):
 		return True
 	return False
 
-X,Y=0,1
-from geometry import intersection
-from utils import LinkedList, Node as LLNode
-from fortune import Arc
+from .geometry import X,Y,intersection
+from .utils import LinkedList, Node as LLNode
 class Node(LLNode):
 	def __init__(self,data,next=None,prev=None):
 		self.__dict__.update(data.__dict__.copy())
@@ -112,7 +119,8 @@ class LLBeachLine(BeachLine):
 				return node
 		raise Exception('No intersection for p = %s' % str(p))
 
-	def insert(self,arc,within=None):
+	def insert(self,p,within=None):
+		arc = Arc(p)
 		print 'insert', arc, within
 		if within is not None:
 			# within <-> node <-> tmp

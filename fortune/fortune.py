@@ -1,82 +1,16 @@
 # -*- coding: utf-8 -*-
+
 from heapq import heappush, heappop, heapify
-import logging
 
-circles = []
-
-class Event(object):
-	"""The priority of an event is determined by when the sweep line will encounter it.  
-	There are two kinds of events:
-	- Site Events:
-	  Site events would be given a higher priority if they have a larger y-coordinate (assuming y increases in the upward direction)
-	- Circle Events:
-	  Circle events would be given a higher priority if they have a larger y-coordinate of the sweep line as it just grazes the bottom 
-	  of the circle corresponding to the circle event.
-
-	  Site event we store the site itself.
-	  For a circle event we store is the lowest point of the circle, with a pointer to the leaft in T that represents the arc that will disappear
-	"""
-
-	def __init__(self, point):
-		self.point = point
-		self.is_site = True
-
-	def __repr__(self):
-		return str(self)
-
-	def __str__(self):
-		return "Event(point={},is_site={})".format(self.point,self.is_site)
-
-	def __cmp__(self, other):
-		assert isinstance(other,Event)
-		return cmp(other.point[Y],self.point[Y])
-
-class CircleEvent(Event):
-	def __init__(self, point, arc, center):
-		super(CircleEvent,self).__init__(point)
-		self.arc = arc
-		self.center = center
-		self.is_site = False
-		self.deleted = False
-
-	def __str__(self):
-		return "CircleEvent(point={},arc={},deleted={})".format(self.point,self.arc,self.deleted)
+from .event import Event, CircleEvent
+from .dcel import Hedge
+from .geometry import X,Y,circle, same_point
+from .beachline import LLBeachLine
 
 
-class Arc(object):
-	def __init__(self, point=None):
-		self.point = point
-		# The node in the event queue that represents the circle event in which this event will disappear
-		self.circle_event = None
-
-	def __str__(self):
-		return "Arc(point=[{}])".format(self.point)
-
-X = 0
-Y = 1
-edges = []
-class Hedge(object):
-	def __init__(self,p,q,y):
-		self.left = p
-		self.right = q
-		self.end = None
-		self.origin = self.current(y)
-
-	def current(self,directrix):
-		if self.end:
-			return self.end
-		return intersection(self.left,self.right,directrix)
-
-	def finish(self, p):
-		if self.end is None:
-			self.end = p
-
-	def __str__(self):
-		return 'Hedge(left={}, right={}'.format(self.left,self.right)
-
-import llbeachline
 class Voronoi(object):
 	def __call__(self, pts):
+		self.edges = []
 		self.input = pts
 		self.run(pts)
 
@@ -88,7 +22,7 @@ class Voronoi(object):
 		D: Doubly connected edge list
 		"""
 
-		self.T = llbeachline.LLBeachLine()
+		self.T = LLBeachLine()
 		self.Q = [ Event(p) for p in points ]
 		heapify(self.Q)
 		print 'Q', self.Q
@@ -114,8 +48,7 @@ class Voronoi(object):
 	# 	y = 
 	# 	for h in edges:
 	# 		h.finish(intersection)
-# // Find the rightmost point on the circle through a,b,c.
-# bool circle(point a, point b, point c, double *x, point *o)
+
 	# http://www.ams.org/samplings/feature-column/fcarc-voronoi
 	def _handle_site_event(self, evt):
 		"""
@@ -148,9 +81,8 @@ class Voronoi(object):
 			   in the queue.  Make a pointer from the middle leaf (the leaf that will disappear in the 
 			   circle event) to the event in the queue.
 		"""
-		global edges
 		if self.T.is_empty:
-			self.T.insert(Arc(evt.point))
+			self.T.insert(evt.point)
 		else:
 			# a is the arc vertically above evt.point in the beachline
 			a = self.T.search(evt.point)
@@ -162,13 +94,13 @@ class Voronoi(object):
 				print 'false alarm!', a.circle_event
 				a.circle_event.deleted = True
 
-			x = self.T.insert(Arc(evt.point),within=a)
+			x = self.T.insert(evt.point,within=a)
 			# Create edges
 			# Add new half-edges connected to i's endpoints.
 			# i->prev->s1 = i->s0 = new seg(z);
 			# i->next->s0 = i->s1 = new seg(z);
-			edges.append(Hedge(a.point,x.point,x.point[Y]))
-			edges.append(Hedge(x.point,a.point,x.point[Y]))
+			self.edges.append(Hedge(a.point,x.point,x.point[Y]))
+			self.edges.append(Hedge(x.point,a.point,x.point[Y]))
 
 			# check the triples where this new site is the far left and far right arc.
 			predecessor = self.T.predecessor(x)
@@ -196,16 +128,15 @@ class Voronoi(object):
 			   in that event.
  		Source: http://cgm.cs.mcgill.ca/~mcleish/644/Projects/DerekJohns/Sweep.htm#SweepAlgorithm
  		"""
- 		global edges
  		if not evt.deleted:
  			#print '------->', evt, ' deleting ', evt.arc
  			# Step 1
- 			for h in edges:
+ 			for h in self.edges:
  				#print '\t', h.current(evt.point[Y]), evt.center, same_point(h.current(evt.point[Y]), evt.center)
  				if same_point(h.current(evt.point[Y]), evt.center):
  					h.finish(evt.center)
 
- 			edges.append(Hedge(evt.arc.prev.point, evt.arc.next.point, evt.point[Y]))
+ 			self.edges.append(Hedge(evt.arc.prev.point, evt.arc.next.point, evt.point[Y]))
  			#remove possible circle events involving this site'
  			x = evt.arc
  			print 'xxx', evt.arc.circle_event
@@ -225,24 +156,15 @@ class Voronoi(object):
 
  	def check_circle(self, arc, y):
  		"""Look for a new circle event for arc."""
- 		global circles
-
- 		# # Invalidate old events 
- 		# if arc.circle_event and arc.circle_event.point[Y] != y:
- 		# 	arc.circle_event.deleted = True
- 		# 	print 'deleted', arc, arc.circle_event
- 		# arc.circle_event = None
 
  		predecessor = self.T.predecessor(arc)
  		sucessor = self.T.sucessor(arc)
+ 		
  		# We need a triple of arcs.
  		if not predecessor or not sucessor or not arc:
  			return
 
  		bottom, center = circle(predecessor.point, arc.point, sucessor.point)
- 		#print 'check_circle', arc, y
- 		#print '\t', center, bottom
- 		circles.append((center,bottom))
  		if center and bottom[Y] < y:
  			if abs(bottom[Y] - y) < 0.0001: return
  			arc.circle_event = CircleEvent(bottom,arc,center)
@@ -250,80 +172,7 @@ class Voronoi(object):
  			print 'CircleEvent DETECTED !!! arc ', y, arc, arc.circle_event
 
 
-from matplotlib import pyplot as plt
-from pylab import savefig
-from anim import *
-from geometry import intersection, circle, euclidean_distance as dist, same_point
-i=1
-def animate(self,e,draw_bottoms=True):
-	global i
-	global circles
-	global edges
 
-	filename = 'tmp-{0:03}.png'.format(i)
-	plt.clf()
-	fig = plt.gcf()
-	# plt.axis([0,width, 0, height])
-	plt.axis([-5,20, 0, 20])
-
-	print
-	print i, 'Event: ', e
-	print '============================'
-	print 'beachline', self.T, ' in ', filename
-	#print 'ARCS:'
-	#print 'head',self.T.list.head
-	for arc in self.T:
-		#print '\t', arc, arc.prev, arc.next
-		end,start=None,None
-		# plot intersections
-		if arc.prev:
-			start = intersection(arc.prev.point,arc.point,e.point[Y])
-			#plt.plot(start[0],start[1],'o',color='red')
-		if arc.next:
-			end = intersection(arc.point,arc.next.point,e.point[Y])
-			#plt.plot(end[0],end[1],'o',color='red')
-		plot_parabola(arc.point,e.point[Y],endpoints=[start,end],color='purple')
-		#print '\t\tstart = ',start,'end = ',end
-
-	#print 'edges:'
-	for h in edges:
-		#print '\t', h, h.origin, h.current(e.point[Y])
-		plot_line(h.origin, h.current(e.point[Y]), color='blue')
-
-	for center, bottom in circles:
-		# radius = dist(center,bottom)
-		# circle=plt.Circle(center,radius,color='b',fill=False)
-		# fig.gca().add_artist(circle)
-
-		# plot_points([center,bottom], color='green')
-		if draw_bottoms and bottom:
-			plot_points([bottom], color='green')
-
-	#plot_vertical(e.point[X])
-	plot_directrix(e.point[Y])
-	plot_points(self.input)
-	
-	fig.savefig(filename, bbox_inches='tight')
-	print '============================'
-	i+=1
-
-if __name__ == '__main__':
-	v = Voronoi()
-	Voronoi.animate = animate
-	#pts = [(1,1,'p'),(2,2,'q'),(3,0.5,'r')]
-	x = [4,8,11,5,9,12.5]
-	y = [12,11,10,6.5,5.5,4.5]
-	label = ['a','b','c','d','e','f']
-	# x = [4,3,11]
-	# y = [12,3,6]
-	# label = ['a','b','c']
-	#x = [4,8,11,5]
-	#y = [12,11,10,6.5]
-	#label = ['a','b','c','d']
-	pts = zip(x,y,label)
-	edges = v(pts)
-
-	print edges	
 
 
 """

@@ -39,7 +39,7 @@ import pylab
 
 
 
-from geometry import vertex, coefficients
+from fortune.geometry import vertex, coefficients
 def parabola (list_x, focus, directrix):
 	A,B,C = coefficients(focus,directrix)
 	#print 'coe', A,B,C, 'focus', focus, 'directrix', directrix
@@ -91,3 +91,64 @@ def plot_parabola(focus,directrix, endpoints=None,pts=pylab.linspace(-10, width,
 		#parabolas.append(parabola(pts,f,directrix))
 		# Plot a vertical line that has the focus
 	#plt.plot([a,a],[0,height],'b-',color=c)
+
+from matplotlib import pyplot as plt
+from pylab import savefig
+from anim import *
+from fortune.geometry import intersection, circle, euclidean_distance as dist, same_point
+
+
+i=1
+def animate(self,e,draw_bottoms=True):
+	global i
+	global circles
+
+	filename = 'tmp-{0:03}.png'.format(i)
+	plt.clf()
+	fig = plt.gcf()
+	# plt.axis([0,width, 0, height])
+	plt.axis([-5,20, 0, 20])
+
+	print
+	print i, 'Event: ', e
+	print '============================'
+	print 'beachline', self.T, ' in ', filename
+	#print 'ARCS:'
+	#print 'head',self.T.list.head
+	for arc in self.T:
+		#print '\t', arc, arc.prev, arc.next
+		end,start=None,None
+		# plot intersections
+		if arc.prev:
+			start = intersection(arc.prev.point,arc.point,e.point[Y])
+			#plt.plot(start[0],start[1],'o',color='red')
+		if arc.next:
+			end = intersection(arc.point,arc.next.point,e.point[Y])
+			#plt.plot(end[0],end[1],'o',color='red')
+		plot_parabola(arc.point,e.point[Y],endpoints=[start,end],color='purple')
+		#print '\t\tstart = ',start,'end = ',end
+
+	#print 'edges:'
+	for h in self.edges:
+		#print '\t', h, h.origin, h.current(e.point[Y])
+		plot_line(h.origin, h.current(e.point[Y]), color='blue')
+
+	for evt in self.Q:
+		# Circle Event
+		if not evt.is_site:
+			bottom, center = evt.point, evt.center
+			# radius = dist(center,bottom)
+			# circle=plt.Circle(center,radius,color='b',fill=False)
+			# fig.gca().add_artist(circle)
+
+			# plot_points([center,bottom], color='green')
+			if draw_bottoms and bottom:
+				plot_points([bottom], color='green')
+
+	#plot_vertical(e.point[X])
+	plot_directrix(e.point[Y])
+	plot_points(self.input)
+	
+	fig.savefig(filename, bbox_inches='tight')
+	print '============================'
+	i+=1
