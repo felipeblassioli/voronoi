@@ -13,16 +13,16 @@ if __name__ == '__main__':
 	# label = ['a','b','c']parabola = (a,b,c)
 
 	# Three colinear points
-	x = [10,5,0]
-	y = [11,11,11]
-	label = ['b','c','a']
+	# x = [10,5,0]
+	# y = [11,11,11]
+	# label = ['b','c','a']
 
 	# Two colinear points
 	# x = [8,11,13]
 	# y = [11,11,9]
 	# label = ['b','c','d']
 
-	# Three colinear points
+	#Three colinear points
 	# x = [4,8,11,14]
 	# y = [12,11,11,11]
 	# label = ['a','b','c','d']

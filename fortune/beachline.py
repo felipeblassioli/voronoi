@@ -174,3 +174,132 @@ class LLBeachLine(BeachLine):
 	def __iter__(self):
 		for n in self.list:
 			yield n
+
+class AVLNode(object):
+	def __init__(self,p,q=None,left=None,right=None,parent=None):
+		self.p = p
+		self.q = q
+		self.left = left
+		self.right = right
+		self.parent = parent
+
+		arc = Arc(p)
+		self.__dict__.update(arc.__dict__.copy())
+
+	def key(self,directrix):
+		if self.q is None:
+			return self.p[0]
+		else:
+			return intersection(self.p, self.q, directrix)[0]
+
+	def __str__(self):
+		if self.q:
+			return '(%s,%s)' % (self.p[2], self.q[2])
+		else:
+			return '(%s)' % self.p[2]
+
+	@property
+	def is_leaf(self):
+		return self.q is None
+
+from utils import BinarySearchTree
+class AVLBeachLine(BeachLine):
+	def __init__(self):
+		self.T = BinarySearchTree()
+
+	def search(self, p):
+		"""Given a fixed location of the sweep line, determine the arc of the
+		beach line that intersects a given vertical line.
+		"""
+		curr = self.T._root
+		while True:
+			#print 'curr', p[1], curr.key(p[1]), curr, curr.left, curr.right, p[1] < curr.key(p[1])
+			if p[0] < curr.key(p[1]):
+				if curr.left:
+					curr = curr.left
+				else:
+					return curr
+			else:
+				if curr.right:
+					curr = curr.right
+				else:
+					return curr
+
+	def predecessor(self,x):
+		"""
+		Given a node
+		If all keys are distinct, the sucessor of a node x is the node with the smallest key greater than x.key
+		"""
+		pred = self.T.predecessor(x)
+		if pred is not None:
+			return self.T.predecessor(pred)
+
+	def sucessor(self,x):
+		suc = self.T.sucessor(x)
+		if suc is not None:
+			return self.T.sucessor(suc)
+
+	def delete(self, arc):
+		# find internal nodes
+
+		print 'delete'
+		pred = self.T.predecessor(arc)
+		suc = self.T.sucessor(arc)
+		# siblings are not true sucessors
+		rsib = self.sucessor(arc)
+		lsib = self.predecessor(arc)
+
+		print 'siblings:'
+		print lsib, arc, rsib
+		print 'successors'
+		print pred, arc, suc
+		if arc.parent == pred:
+			# I am the right child!
+			pa = arc.parent
+			grandpa = pa.parent
+			if grandpa.left == pa:
+				grandpa.left = lsib
+			else:
+				grandpa.right = lsib
+			suc.p = lsib.p
+		else:
+			# I am the left child!
+			pa = arc.parent
+			grandpa = pa.parent
+			if grandpa.left == pa:
+				grandpa.left = rsib
+			else:
+				grandpa.right = rsib
+			pred.q = rsib.p
+
+
+	def insert(self, p, within=None):
+		"""Insert an new arc pi within a given arc pj,
+		thus splitting the arc for pj into two. This creates three
+		arcs, pj, pi, and pj.
+		"""
+		if within is not None:
+			within.q = p
+			within.left = AVLNode(within.p, parent=within)
+			within.right = AVLNode(p,within.p, parent=within)
+			cur = within.right
+			cur.left = AVLNode(cur.p, parent=cur)
+			cur.right = AVLNode(cur.q, parent=cur)
+
+			node = AVLNode(p,within.p, parent=within)
+		else:
+			self.T._root = AVLNode(p)
+			node = self.T._root
+		return node
+
+	@property
+	def is_empty(self):
+		return self.T._root is None
+
+	def __iter__(self):
+		for node in self.T:
+			if node.is_leaf:
+				yield node
+
+	def __str__(self):
+		return ' '.join([ str(x) for x in self ])

@@ -51,6 +51,71 @@ class LinkedList(object):
 	def __repr__(self):
 		return self.__str__()
 
+
+class BinarySearchTree(object):
+	def __init__(self):
+		self._root = None
+
+	def minimum(self, x):
+		# Cormen 3ed p291
+		while x.left is not None:
+			x = x.left
+		return x
+
+	def maximum(self, x):
+		# Cormen 3ed p291
+		while x.right is not None:
+			x = x.right
+		return x
+
+	def predecessor(self,x):
+		"""
+		Given a node
+		If all keys are distinct, the sucessor of a node x is the node with the smallest key greater than x.key
+		"""
+
+		# Cormen 3ed p292
+		if x.left is not None:
+			return self.minimum(x.left)
+		y = x.parent
+		while y is not None and x == y.left:
+			x = y
+			y = y.parent
+		return y
+
+	def sucessor(self,x):
+		# Cormen 3ed p292
+		if x.right is not None:
+			return self.minimum(x.right)
+		y = x.parent
+		while y is not None and x == y.right:
+			x = y
+			y = y.parent
+		return y
+
+
+	@property
+	def is_empty(self):
+		return self._root is None
+
+	def __iter__(self):
+		nodes = []
+		def _traverse(node):
+			if node.left is not None:
+				_traverse(node.left)
+			nodes.append(node)
+			if node.right is not None:
+				_traverse(node.right)
+		if self._root:
+			_traverse(self._root)
+			for n in nodes:
+				yield n
+		else:
+			raise Exception('Tree is_empty')
+
+	def __str__(self):
+		return ' '.join([ str(x) for x in self ])
+
 from random import randint
 if __name__ == '__main__':
 	l = LinkedList()

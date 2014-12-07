@@ -5,7 +5,7 @@ from heapq import heappush, heappop, heapify
 from .event import Event, CircleEvent
 from .dcel import Hedge
 from .geometry import X,Y,circle, same_point
-from .beachline import LLBeachLine
+from .beachline import LLBeachLine, AVLBeachLine
 
 
 class Voronoi(object):
@@ -86,9 +86,9 @@ class Voronoi(object):
 		else:
 			# a is the arc vertically above evt.point in the beachline
 			a = self.T.search(evt.point)
-			# print
-			# print '\ta is ', a
-			# print
+			print
+			print '\ta is ', a
+			print
 			# If the arc a points to circle event, delete that event
 			if a.circle_event:
 				print 'false alarm!', a.circle_event
@@ -136,7 +136,9 @@ class Voronoi(object):
  				if same_point(h.current(evt.point[Y]), evt.center):
  					h.finish(evt.center)
 
- 			self.edges.append(Hedge(evt.arc.prev.point, evt.arc.next.point, evt.point[Y]))
+ 			
+
+ 			self.edges.append(Hedge(self.T.predecessor(evt.arc).point, self.T.sucessor(evt.arc).point, evt.point[Y]))
  			#remove possible circle events involving this site'
  			x = evt.arc
  			print 'xxx', evt.arc.circle_event

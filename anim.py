@@ -120,14 +120,14 @@ def animate(self,e,draw_bottoms=True, draw_circles=False):
 	#print 'ARCS:'
 	#print 'head',self.T.list.head
 	for arc in self.T:
-		#print '\t', arc, arc.prev, arc.next
+		#print '\t', arc, self.T.predecessor(arc), self.T.sucessor(arc)
 		end,start=None,None
 		# plot intersections
-		if arc.prev and arc.prev.point[Y] != e.point[Y]:
-			start = intersection(arc.prev.point,arc.point,e.point[Y])
+		if self.T.predecessor(arc) and self.T.predecessor(arc).point[Y] != e.point[Y]:
+			start = intersection(self.T.predecessor(arc).point,arc.point,e.point[Y])
 			#plt.plot(start[0],start[1],'o',color='red')
-		if arc.next and arc.next.point[Y] != e.point[Y]:
-			end = intersection(arc.point,arc.next.point,e.point[Y])
+		if self.T.sucessor(arc) and self.T.sucessor(arc).point[Y] != e.point[Y]:
+			end = intersection(arc.point,self.T.sucessor(arc).point,e.point[Y])
 			#plt.plot(end[0],end[1],'o',color='red')
 		plot_parabola(arc.point,e.point[Y],endpoints=[start,end],color='purple')
 		#print '\t\tstart = ',start,'end = ',end
