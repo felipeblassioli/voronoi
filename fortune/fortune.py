@@ -149,24 +149,31 @@ class Voronoi(object):
  					if e.arc.point == evt.arc.point:
  						e.deleted = True
 
- 			self.T.delete(evt.arc)
-
-			predecessor = self.T.predecessor(x)
+ 			predecessor = self.T.predecessor(x)
 			sucessor = self.T.sucessor(x)
-			self.check_circle(predecessor, evt.point[Y])
- 			self.check_circle(sucessor, evt.point[Y])
+			self._check_circle(self.T.predecessor(predecessor), predecessor, sucessor, evt.point[Y])
+			self._check_circle(predecessor, sucessor, self.T.sucessor(sucessor), evt.point[Y])
+			print 'pred/suc', predecessor, sucessor
+
+			print 'before delete', self.T
+			print self.T.T.dumps()
+ 			self.T.delete(evt.arc)
+ 			print 'after delete', self.T
+ 			print self.T.T.dumps()
+
+ 		# 	predecessor = self.T.predecessor(x)
+			# sucessor = self.T.sucessor(x)
+			# print 'pred/suc', predecessor, sucessor
+			# self.check_circle(predecessor, evt.point[Y])
+ 		# 	self.check_circle(sucessor, evt.point[Y])
+
+ 			
  		else:
  			print evt, 'already deleted'
 
- 	def check_circle(self, arc, y):
- 		"""Look for a new circle event for arc."""
-
- 		predecessor = self.T.predecessor(arc)
- 		sucessor = self.T.sucessor(arc)
-
- 		print 'check_circle', predecessor, arc, sucessor
- 		
- 		# We need a triple of arcs.
+ 	def _check_circle(self, predecessor, arc, sucessor, y):
+ 		print 'check_circle', predecessor, arc, sucessor, 'tree:', self.T.T.predecessor(arc), self.T.T.sucessor(arc), self.T.predecessor(arc), self.T.sucessor(arc)
+ 		 # We need a triple of arcs.
  		if not predecessor or not sucessor or not arc:
  			return
 
@@ -176,6 +183,14 @@ class Voronoi(object):
  			arc.circle_event = CircleEvent(bottom,arc,center)
  			heappush(self.Q, arc.circle_event)
  			print 'CircleEvent DETECTED !!! arc ', y, arc, arc.circle_event
+
+ 	def check_circle(self, arc, y):
+ 		"""Look for a new circle event for arc."""
+
+ 		predecessor = self.T.predecessor(arc)
+ 		sucessor = self.T.sucessor(arc)
+
+ 		self._check_circle(predecessor,arc,sucessor,y)
 
 
 

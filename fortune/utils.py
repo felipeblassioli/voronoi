@@ -51,6 +51,29 @@ class LinkedList(object):
 	def __repr__(self):
 		return self.__str__()
 
+def out(start_node):
+	# if start_node == None:
+	# 	start_node = self.root
+	print 'start', start_node
+	space_symbol = "-"
+	spaces_count = 140
+	out_string = ""
+	initial_spaces_string  = space_symbol * spaces_count + "\n" 
+	if not start_node:
+		return "AVLTree is empty"
+	else:
+		level = [start_node]
+		while (len([i for i in level if (not i is None)])>0):
+			level_string = initial_spaces_string
+			for i in xrange(len(level)):
+				j = (i+1)* spaces_count / (len(level)+1)
+				level_string = level_string[:j] + (str(level[i]) if level[i] else space_symbol) + level_string[j+1:]
+			level_next = []
+			for i in level:
+				level_next += ([i.left, i.right] if i else [None, None])
+			level = level_next
+			out_string += level_string                    
+	return out_string
 
 class BinarySearchTree(object):
 	def __init__(self):
@@ -76,7 +99,7 @@ class BinarySearchTree(object):
 
 		# Cormen 3ed p292
 		if x.left is not None:
-			return self.minimum(x.left)
+			return self.maximum(x.left)
 		y = x.parent
 		while y is not None and x == y.left:
 			x = y
@@ -93,6 +116,8 @@ class BinarySearchTree(object):
 			y = y.parent
 		return y
 
+	def dumps(self):
+		return out(self._root)
 
 	@property
 	def is_empty(self):

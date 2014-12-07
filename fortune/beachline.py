@@ -233,11 +233,15 @@ class AVLBeachLine(BeachLine):
 		pred = self.T.predecessor(x)
 		if pred is not None:
 			return self.T.predecessor(pred)
+		else:
+			print 'predecessor is none!'
 
 	def sucessor(self,x):
 		suc = self.T.sucessor(x)
 		if suc is not None:
 			return self.T.sucessor(suc)
+		else:
+			print 'sucessor is none!'
 
 	def delete(self, arc):
 		# find internal nodes
@@ -255,21 +259,23 @@ class AVLBeachLine(BeachLine):
 		print pred, arc, suc
 		if arc.parent == pred:
 			# I am the right child!
+			print 'I AM RIGHT !!!!!!!!!!!!', arc.parent
 			pa = arc.parent
 			grandpa = pa.parent
 			if grandpa.left == pa:
-				grandpa.left = lsib
+				grandpa.left = pa.left
 			else:
-				grandpa.right = lsib
+				grandpa.right = pa.left
 			suc.p = lsib.p
 		else:
 			# I am the left child!
+			print 'I AM LEFT !!!!!!!!!!!!', arc.parent
 			pa = arc.parent
 			grandpa = pa.parent
 			if grandpa.left == pa:
-				grandpa.left = rsib
+				grandpa.left = pa.right
 			else:
-				grandpa.right = rsib
+				grandpa.right = pa.right
 			pred.q = rsib.p
 
 
@@ -298,8 +304,8 @@ class AVLBeachLine(BeachLine):
 
 	def __iter__(self):
 		for node in self.T:
-			if node.is_leaf:
-				yield node
+			#if node.is_leaf:
+			yield node
 
 	def __str__(self):
 		return ' '.join([ str(x) for x in self ])
