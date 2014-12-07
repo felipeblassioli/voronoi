@@ -286,7 +286,7 @@ class AVLBeachLine(BeachLine):
 			cur.left = AVLNode(cur.p, parent=cur)
 			cur.right = AVLNode(cur.q, parent=cur)
 
-			node = AVLNode(p,within.p, parent=within)
+			node = cur.left
 		else:
 			self.T._root = AVLNode(p)
 			node = self.T._root

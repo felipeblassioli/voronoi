@@ -114,8 +114,8 @@ def animate(self,e,draw_bottoms=True, draw_circles=False):
 	plt.axis([-5,20, 0, 20])
 
 	print
-	print i, 'Event: ', e
-	print '============================'
+	#print i, 'Event: ', e
+	print 'ANIM BEGIN'
 	print 'beachline', self.T, ' in ', filename
 	#print 'ARCS:'
 	#print 'head',self.T.list.head
@@ -135,7 +135,7 @@ def animate(self,e,draw_bottoms=True, draw_circles=False):
 
 	#print 'edges:'
 	for h in self.edges:
-		print '\t', h, h.origin, h.current(e.point[Y])
+		#print '\t', h, h.origin, h.current(e.point[Y])
 		plot_line(h.origin, h.current(e.point[Y]), color='blue')
 
 	if not e.is_site:
@@ -171,5 +171,5 @@ def animate(self,e,draw_bottoms=True, draw_circles=False):
 		plot_points([e.point], color='black')
 	
 	fig.savefig(filename, bbox_inches='tight')
-	print '============================'
+	print 'ANIM END'
 	i+=1

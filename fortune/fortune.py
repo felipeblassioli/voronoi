@@ -22,20 +22,23 @@ class Voronoi(object):
 		D: Doubly connected edge list
 		"""
 
-		self.T = LLBeachLine()
+		self.T = AVLBeachLine()
 		self.Q = [ Event(p) for p in points ]
 		heapify(self.Q)
 		print 'Q', self.Q
-		print '------------- Main Loop ---------'
+		print '============== Main Loop BEGIN =============='
 		while len(self.Q) > 0:
 			event = heappop(self.Q)
+			print
+			print 'Popped event: ', event
+			print '-----------------------------------'
 			if event.is_site: 
 				self._handle_site_event(event)
 			else: 
 				self._handle_circle_event(event)
 			self.animate(event)
 		
-		print '-------------------------------'
+		print '============== Main Loop END =============='
 
 		#self._finish(self.root)
 		self.animate(Event((0,-100)), draw_bottoms=False)
@@ -86,9 +89,7 @@ class Voronoi(object):
 		else:
 			# a is the arc vertically above evt.point in the beachline
 			a = self.T.search(evt.point)
-			print
-			print '\ta is ', a
-			print
+			print 'above ', evt.point, 'is', a
 			# If the arc a points to circle event, delete that event
 			if a.circle_event:
 				print 'false alarm!', a.circle_event
@@ -105,6 +106,7 @@ class Voronoi(object):
 			# check the triples where this new site is the far left and far right arc.
 			predecessor = self.T.predecessor(x)
 			sucessor = self.T.sucessor(x)
+			print 'triple of x is ', predecessor, x, sucessor
 			self.check_circle(predecessor, evt.point[Y])
  			self.check_circle(sucessor, evt.point[Y])
 			
@@ -161,6 +163,8 @@ class Voronoi(object):
 
  		predecessor = self.T.predecessor(arc)
  		sucessor = self.T.sucessor(arc)
+
+ 		print 'check_circle', predecessor, arc, sucessor
  		
  		# We need a triple of arcs.
  		if not predecessor or not sucessor or not arc:
