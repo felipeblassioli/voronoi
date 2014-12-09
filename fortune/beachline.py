@@ -81,13 +81,10 @@ class BeachLine(object):
 
 def intersect(p, node):
 	"""Will a new parabola at point p intersect with arc at node?"""
-	#print 'intersect', p, node
 	if node.prev:
 		a = intersection(node.prev.data.point, node.data.point, p[Y])[X]
-		#print '\ta', a
 	if node.next:
 		b = intersection(node.data.point, node.next.data.point, p[Y])[X]
-		#print '\tb', b
 	if (not node.prev or a <= p[X]) and (not node.next or p[X] <= b):
 		return True
 	return False
@@ -111,17 +108,14 @@ class LLBeachLine(BeachLine):
 		self.list = LinkedList()
 
 	def search(self, p):
-		#print 'search', p, self.list
 		for node in self.list:
 			# node.data is the arc
-			#print 'node', node
 			if intersect(p,node):
 				return node
 		raise Exception('No intersection for p = %s' % str(p))
 
 	def insert(self,p,within=None):
 		arc = Arc(p)
-		print 'insert', arc, within
 		if within is not None:
 			# within <-> node <-> tmp
 			#if within.next and not intersect(arc.point,within.next):
@@ -131,27 +125,17 @@ class LLBeachLine(BeachLine):
 			if within.next:
 				within.next.prev = tmp
 			within.next = node
-			# print '\ttmp', tmp.data, tmp.prev, tmp.next
-			# print '\tnode', node.data, node.prev, node.next
-			# print '\twithin', within.data, within.prev, within.next
 
-			# print hex(id(tmp)),hex(id(within)),hex(id(node))
-			# print 'head', self.list.head
 			# for n in self.list:
-			# 	print n
 			# else:
-			# 	print 'fuuuuuuuuuuuuuu'
 			# 	within.next = Node(arc,)
-			#print 'there', self.list
 		else:
 			self.list.head = Node(arc)
 			node = self.list.head
-			#print 'here', self.list
 
 		return node
 
 	def delete(self, arc):
-		print 'delete', arc
 		if arc.prev:
 			arc.prev.next = arc.next
 
@@ -190,12 +174,10 @@ class AVLNode(dict):
 			self.__setattr__(k,v)
 
 	def __eq__(self,other):
-		#print 'comparing', self, other
 		#return super(AVLNode, self).__eq__(other)
 		return self.p == other.p and self.q == other.q
 
 	# def __cmp__(self,other):
-	# 	print '__cmp__', self, other
 	# 	if isinstance(other,AVLNode):
 	# 		return super(AVLNode, self).__cmp__(other)
 	# 	return -1
@@ -245,7 +227,6 @@ class AVLBeachLine(BeachLine):
 		"""
 		curr = self.T._root
 		while True:
-			#print 'curr', p[1], curr.key(p[1]), curr, curr.left, curr.right, p[1] < curr.key(p[1])
 			if p[0] < curr.key(p[1]):
 				if curr.left:
 					curr = curr.left
@@ -268,28 +249,20 @@ class AVLBeachLine(BeachLine):
 
 	def sucessor(self,x):
 		suc = self.T.sucessor(x)
-		#print 'sucessor of ', x, 'is', suc
 		if suc is not None:
 			return self.T.sucessor(suc)
 
 	def delete(self, arc):
 		# find internal nodes
 
-		print 'delete', arc
 		pred = self.T.predecessor(arc)
 		suc = self.T.sucessor(arc)
 		# siblings are not true sucessors
 		rsib = self.sucessor(arc)
 		lsib = self.predecessor(arc)
 
-		print 'siblings:'
-		print lsib, arc, rsib
-		print 'successors'
-		print pred, arc, suc
-		print 'parent', arc.parent, 'pred', pred
 		if arc.parent == pred:
 			# I am the right child!
-			print 'I AM RIGHT !!!!!!!!!!!!', arc.parent
 			pa = arc.parent
 			grandpa = pa.parent
 			if grandpa.left == pa:
@@ -299,7 +272,6 @@ class AVLBeachLine(BeachLine):
 			suc.p = lsib.p
 		else:
 			# I am the left child!
-			print 'I AM LEFT !!!!!!!!!!!!', arc.parent
 			pa = arc.parent
 			grandpa = pa.parent
 			if grandpa.left == pa:

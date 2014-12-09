@@ -14,15 +14,13 @@ def solve(a,b,c):
 	d = b**2-4*a*c # discriminant
 
 	if d < 0:
-		print ("This equation has no real solution")
+		print 'discriminant is < 0!'
 	elif d == 0:
 		x = (-b+sqrt(b**2-4*a*c))/2*a
-		# print ("This equation has one solutions: "), x
 		sols.append(x)
 	else:
 		x1 = (-b+sqrt((b**2)-(4*(a*c))))/(2*a)
 		x2 = (-b-sqrt((b**2)-(4*(a*c))))/(2*a)
-		# print ("This equation has two solutions: ", x1, " or", x2)
 		sols.append(x1)
 		sols.append(x2)
 	return sols
@@ -45,7 +43,6 @@ def coefficients(focus, directrix):
 		B = -1*h / (2.0*p)
 		C = (h**2 / (4.0*p)) + k
 
-	#print p,A
 
 	return A,B,C
 
@@ -54,10 +51,8 @@ def intersection(p,q,directrix):
 	a,b,c = coefficients(p,directrix)
 	d,e,f = coefficients(q,directrix)
 
-	#print '\tintersection', p, q, directrix
 	if p[Y] == q[Y]:
 		x = (p[X] + q[X]) / 2.0
-		#print 'intersection', x,p[Y]
 		return x,p[Y]
 	elif q[Y] == directrix:
 		x = q[X]
@@ -67,7 +62,6 @@ def intersection(p,q,directrix):
 		parabola = (d,e,f)
 	else:
 		sols = solve(a-d,b-e,c-f) 
-		#print 'sols', sols
 		# we get the rightmost point
 		x = sols[0]
 		parabola = (a,b,c)
@@ -92,7 +86,6 @@ def circle(a,b,c):
 	radius = sqrt((a[X] - center[X])**2 + (a[Y] - center[Y])**2)
 	bottom = center[X], center[Y] - radius
 
-	#print 'circle through', a,b,c
 	return bottom, center
 
 def euclidean_distance(p,q):
@@ -102,11 +95,3 @@ def same_point(p,q,epsilon=0.00001):
 	_eq = lambda a, b, t: abs(a - b) < t
 
 	return _eq(p[X],q[X],epsilon) and _eq(p[Y],q[Y], epsilon)
-
-
-if __name__ == '__main__':
-	print intersection((4,12),(8,11),10)
-	print intersection((8,11),(4,12),10)
-
-	print intersection((8,11),(11,10),6.5)
-	print intersection((11,10),(8,11),6.5)

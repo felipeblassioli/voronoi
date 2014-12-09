@@ -82,7 +82,6 @@ class BinarySearchTree(object):
 		# Cormen 3ed p291
 		while x.left is not None:
 			x = x.left
-		#print 'minimum is', x
 		return x
 
 	def maximum(self, x):
@@ -112,12 +111,10 @@ class BinarySearchTree(object):
 			return x
 		# Cormen 3ed p292
 		if x.right is not None:
-			#print 'getting minimum of ', x
 			return self.minimum(x.right)
 		y = x.parent
 		while y is not None and x == y.right:
 			x = y
-			print '\t\t', y, y.parent
 			y = y.parent
 		return y
 
@@ -145,20 +142,4 @@ class BinarySearchTree(object):
 
 	def __str__(self):
 		return ' '.join([ str(x) for x in self ])
-
-from random import randint
-if __name__ == '__main__':
-	l = LinkedList()
-	for i in range(1,10):
-		n = randint(1,100)
-		print 'add', n
-		l.add(n)
-
-	print 'List:'
-	for x in l:
-		print x
-
-	print l
-
-	l = LinkedList()
-	print str(l)
+	
