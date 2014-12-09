@@ -96,6 +96,8 @@ class Voronoi(object):
 				a.circle_event.deleted = True
 
 			x = self.T.insert(evt.point,within=a)
+			print x, ' was inserted within', a
+			print '\ttree is ', self.T
 			# Create edges
 			# Add new half-edges connected to i's endpoints.
 			# i->prev->s1 = i->s0 = new seg(z);
@@ -149,34 +151,36 @@ class Voronoi(object):
  					if e.arc.point == evt.arc.point:
  						e.deleted = True
 
- 			predecessor = self.T.predecessor(x)
-			sucessor = self.T.sucessor(x)
-			self._check_circle(self.T.predecessor(predecessor), predecessor, sucessor, evt.point[Y])
-			self._check_circle(predecessor, sucessor, self.T.sucessor(sucessor), evt.point[Y])
-			print 'pred/suc', predecessor, sucessor
+ 		# 	predecessor = self.T.predecessor(x)
+			# sucessor = self.T.sucessor(x)
+			# self._check_circle(self.T.predecessor(predecessor), predecessor, sucessor, evt.point[Y])
+			# self._check_circle(predecessor, sucessor, self.T.sucessor(sucessor), evt.point[Y])
+			# print 'pred/suc', predecessor, sucessor
 
+			predecessor = self.T.predecessor(x)
+			sucessor = self.T.sucessor(x)
 			print 'before delete', self.T
 			print self.T.T.dumps()
  			self.T.delete(evt.arc)
  			print 'after delete', self.T
  			print self.T.T.dumps()
 
- 		# 	predecessor = self.T.predecessor(x)
-			# sucessor = self.T.sucessor(x)
-			# print 'pred/suc', predecessor, sucessor
-			# self.check_circle(predecessor, evt.point[Y])
- 		# 	self.check_circle(sucessor, evt.point[Y])
+ 			
+			print 'pred/suc', predecessor, sucessor
+			self.check_circle(predecessor, evt.point[Y])
+ 			self.check_circle(sucessor, evt.point[Y])
 
  			
  		else:
  			print evt, 'already deleted'
 
  	def _check_circle(self, predecessor, arc, sucessor, y):
- 		print 'check_circle', predecessor, arc, sucessor, 'tree:', self.T.T.predecessor(arc), self.T.T.sucessor(arc), self.T.predecessor(arc), self.T.sucessor(arc)
+ 		print 'check_circle', predecessor, arc, sucessor
  		 # We need a triple of arcs.
  		if not predecessor or not sucessor or not arc:
  			return
 
+ 		print '\txtree:', self.T.T.predecessor(arc), self.T.T.sucessor(arc), self.T.predecessor(arc), self.T.sucessor(arc)
  		bottom, center = circle(predecessor.point, arc.point, sucessor.point)
  		if center and bottom[Y] < y:
  			if abs(bottom[Y] - y) < 0.0001: return
@@ -186,7 +190,7 @@ class Voronoi(object):
 
  	def check_circle(self, arc, y):
  		"""Look for a new circle event for arc."""
-
+ 		#print 'check circlexx', arc
  		predecessor = self.T.predecessor(arc)
  		sucessor = self.T.sucessor(arc)
 

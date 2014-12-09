@@ -54,7 +54,6 @@ class LinkedList(object):
 def out(start_node):
 	# if start_node == None:
 	# 	start_node = self.root
-	print 'start', start_node
 	space_symbol = "-"
 	spaces_count = 140
 	out_string = ""
@@ -83,6 +82,7 @@ class BinarySearchTree(object):
 		# Cormen 3ed p291
 		while x.left is not None:
 			x = x.left
+		#print 'minimum is', x
 		return x
 
 	def maximum(self, x):
@@ -96,7 +96,8 @@ class BinarySearchTree(object):
 		Given a node
 		If all keys are distinct, the sucessor of a node x is the node with the smallest key greater than x.key
 		"""
-
+		if x is None:
+			return x
 		# Cormen 3ed p292
 		if x.left is not None:
 			return self.maximum(x.left)
@@ -107,12 +108,16 @@ class BinarySearchTree(object):
 		return y
 
 	def sucessor(self,x):
+		if x is None:
+			return x
 		# Cormen 3ed p292
 		if x.right is not None:
+			#print 'getting minimum of ', x
 			return self.minimum(x.right)
 		y = x.parent
 		while y is not None and x == y.right:
 			x = y
+			print '\t\t', y, y.parent
 			y = y.parent
 		return y
 

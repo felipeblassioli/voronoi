@@ -16,11 +16,6 @@ def plot_points(pts,color='red'):
 		x,y = zip(*pts)
 		x,y = list(x),list(y)
 	plt.plot(x,y,'o',color=color)
-	# plt.annotate(
-	# 	label, 
-	# 	xy = (x, y), xytext = (-5,5),
-	# 	textcoords = 'offset points', ha = 'right', va = 'bottom'
-	# )	
 
 def plot_line(*args,**kwargs):
 	color = kwargs.pop('color', 'blue')
@@ -95,49 +90,36 @@ def plot_parabola(focus,directrix, endpoints=None,pts=pylab.linspace(-10, width,
 
 from matplotlib import pyplot as plt
 from pylab import savefig
-from anim import *
 from fortune.geometry import intersection, circle, euclidean_distance as dist, same_point
 
+def _draw_beachline(e, beachline):
+	print beachline.T.dumps()
+	print 'beachline', beachline
+	#print 'ARCS:
+	#print 'head',beachline.list.head
+	for arc in beachline:
+		if arc.is_leaf:
+			#print '\t', arc, beachline.predecessor(arc), beachline.sucessor(arc)
+			end,start=None,None
+			# plot intersections
+			print 'arc is ',arc
+			if beachline.predecessor(arc):
+				start = intersection(beachline.predecessor(arc).point,arc.point,e.point[Y])
+				plt.plot(start[0],start[1],'o',color='black')
+			if beachline.sucessor(arc):
+				end = intersection(arc.point,beachline.sucessor(arc).point,e.point[Y])
+				plt.plot(end[0],end[1],'o',color='black')
+			print '\t', beachline.predecessor(arc), arc, beachline.sucessor(arc), ' - ', start, end
+			plot_parabola(arc.point,e.point[Y],endpoints=[start,end],color='purple')
+			#print '\t\tstart = ',start,'end = ',end
 
-i=1
-circles = []
-past_circle_events = []
-def animate(self,e,draw_bottoms=True, draw_circles=False):
-	global i
-	global circles
-	global past_circle_events
-
-	filename = 'tmp-{0:03}.png'.format(i)
-	plt.clf()
-	fig = plt.gcf()
-	# plt.axis([0,width, 0, height])
-	plt.axis([-5,20, 0, 20])
-
-	print
-	#print i, 'Event: ', e
-	print 'ANIM BEGIN'
-	print 'beachline', self.T, ' in ', filename
-	#print 'ARCS:'
-	#print 'head',self.T.list.head
-	for arc in self.T:
-		#print '\t', arc, self.T.predecessor(arc), self.T.sucessor(arc)
-		end,start=None,None
-		# plot intersections
-		if self.T.predecessor(arc) and self.T.predecessor(arc).point[Y] != e.point[Y]:
-			start = intersection(self.T.predecessor(arc).point,arc.point,e.point[Y])
-			#plt.plot(start[0],start[1],'o',color='red')
-		if self.T.sucessor(arc) and self.T.sucessor(arc).point[Y] != e.point[Y]:
-			end = intersection(arc.point,self.T.sucessor(arc).point,e.point[Y])
-			#plt.plot(end[0],end[1],'o',color='red')
-		plot_parabola(arc.point,e.point[Y],endpoints=[start,end],color='purple')
-		#print '\t\tstart = ',start,'end = ',end
-
-
+def _draw_hedges(e, hedges):
 	#print 'edges:'
-	for h in self.edges:
+	for h in hedges:
 		#print '\t', h, h.origin, h.current(e.point[Y])
 		plot_line(h.origin, h.current(e.point[Y]), color='blue')
 
+def _draw_circle_events(e, event_queue, past_circle_events, draw_bottoms=True, draw_circles=False, fig=None):
 	if not e.is_site:
 		bottom, center = e.point, e.center
 		radius = dist(center,bottom)
@@ -149,7 +131,7 @@ def animate(self,e,draw_bottoms=True, draw_circles=False):
 	for e in past_circle_events:
 		plot_points([e.point], color='green')
 
-	for evt in self.Q:
+	for evt in event_queue:
 		# Circle Event
 		if not evt.is_site:
 			bottom, center = evt.point, evt.center
@@ -164,7 +146,25 @@ def animate(self,e,draw_bottoms=True, draw_circles=False):
 			if draw_bottoms and bottom:
 				plot_points([bottom], color='green')
 
-	#plot_vertical(e.point[X])
+i=1
+past_circle_events = []
+def animate(self,e,draw_bottoms=True, draw_circles=False):
+	global i
+	global past_circle_events
+
+	filename = 'tmp-{0:03}.png'.format(i)
+	plt.clf()
+	fig = plt.gcf()
+	# plt.axis([0,width, 0, height])
+	plt.axis([-5,20, 0, 20])
+
+	print
+	#print i, 'Event: ', e
+	print 'ANIM BEGIN for ', filename
+	_draw_beachline(e, self.T)
+	_draw_hedges(e, self.edges)
+	_draw_circle_events(e, self.Q, past_circle_events, draw_bottoms, draw_circles, fig)
+
 	plot_directrix(e.point[Y])
 	plot_points(self.input)
 	if e.is_site:

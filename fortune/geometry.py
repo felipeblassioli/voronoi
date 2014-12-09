@@ -54,7 +54,7 @@ def intersection(p,q,directrix):
 	a,b,c = coefficients(p,directrix)
 	d,e,f = coefficients(q,directrix)
 
-	#print 'intersection', p, q, directrix
+	#print '\tintersection', p, q, directrix
 	if p[Y] == q[Y]:
 		x = (p[X] + q[X]) / 2.0
 		#print 'intersection', x,p[Y]

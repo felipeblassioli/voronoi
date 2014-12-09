@@ -1,6 +1,6 @@
 from fortune import Voronoi
+#from anim import animate
 from anim import animate
-
 if __name__ == '__main__':
 	v = Voronoi()
 	Voronoi.animate = animate

@@ -175,7 +175,7 @@ class LLBeachLine(BeachLine):
 		for n in self.list:
 			yield n
 
-class AVLNode(object):
+class AVLNode(dict):
 	def __init__(self,p,q=None,left=None,right=None,parent=None):
 		self.p = p
 		self.q = q
@@ -184,7 +184,39 @@ class AVLNode(object):
 		self.parent = parent
 
 		arc = Arc(p)
-		self.__dict__.update(arc.__dict__.copy())
+		#self.__dict__.update(arc.__dict__.copy())
+		#self.update(arc.__dict__.copy())
+		for k,v in arc.__dict__.copy().items():
+			self.__setattr__(k,v)
+
+	def __eq__(self,other):
+		#print 'comparing', self, other
+		#return super(AVLNode, self).__eq__(other)
+		return self.p == other.p and self.q == other.q
+
+	# def __cmp__(self,other):
+	# 	print '__cmp__', self, other
+	# 	if isinstance(other,AVLNode):
+	# 		return super(AVLNode, self).__cmp__(other)
+	# 	return -1
+
+	def __setattr__(self,name,value):
+		# super(AVLNode,self).__setitem__(name,value)
+		if name in ['left', 'right'] and isinstance(value,AVLNode):
+			value.parent = self
+		if name in ['left', 'right', 'parent']:
+			super(AVLNode,self).__setitem__(name,value)
+		else:
+			super(AVLNode,self).__setattr__(name,value)
+
+	def __getattribute__(self,name):
+		# if name in ['is_leaf', 'update']:
+		# 	return super(AVLNode,self).__getattribute__(name)
+		# return self[name]
+		if name in ['left', 'right', 'parent']:
+			return self[name]
+		return super(AVLNode,self).__getattribute__(name)
+		
 
 	def key(self,directrix):
 		if self.q is None:
@@ -233,20 +265,17 @@ class AVLBeachLine(BeachLine):
 		pred = self.T.predecessor(x)
 		if pred is not None:
 			return self.T.predecessor(pred)
-		else:
-			print 'predecessor is none!'
 
 	def sucessor(self,x):
 		suc = self.T.sucessor(x)
+		#print 'sucessor of ', x, 'is', suc
 		if suc is not None:
 			return self.T.sucessor(suc)
-		else:
-			print 'sucessor is none!'
 
 	def delete(self, arc):
 		# find internal nodes
 
-		print 'delete'
+		print 'delete', arc
 		pred = self.T.predecessor(arc)
 		suc = self.T.sucessor(arc)
 		# siblings are not true sucessors
@@ -257,6 +286,7 @@ class AVLBeachLine(BeachLine):
 		print lsib, arc, rsib
 		print 'successors'
 		print pred, arc, suc
+		print 'parent', arc.parent, 'pred', pred
 		if arc.parent == pred:
 			# I am the right child!
 			print 'I AM RIGHT !!!!!!!!!!!!', arc.parent
