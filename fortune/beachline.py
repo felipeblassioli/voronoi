@@ -125,10 +125,6 @@ class LLBeachLine(BeachLine):
 			if within.next:
 				within.next.prev = tmp
 			within.next = node
-
-			# for n in self.list:
-			# else:
-			# 	within.next = Node(arc,)
 		else:
 			self.list.head = Node(arc)
 			node = self.list.head
@@ -168,22 +164,14 @@ class AVLNode(dict):
 		self.parent = parent
 
 		arc = Arc(p)
-		#self.__dict__.update(arc.__dict__.copy())
-		#self.update(arc.__dict__.copy())
+		# Merge all arc attributes such as .point, circle_event into the node..
 		for k,v in arc.__dict__.copy().items():
 			self.__setattr__(k,v)
 
 	def __eq__(self,other):
-		#return super(AVLNode, self).__eq__(other)
 		return self.p == other.p and self.q == other.q
 
-	# def __cmp__(self,other):
-	# 	if isinstance(other,AVLNode):
-	# 		return super(AVLNode, self).__cmp__(other)
-	# 	return -1
-
 	def __setattr__(self,name,value):
-		# super(AVLNode,self).__setitem__(name,value)
 		if name in ['left', 'right'] and isinstance(value,AVLNode):
 			value.parent = self
 		if name in ['left', 'right', 'parent']:
@@ -192,9 +180,6 @@ class AVLNode(dict):
 			super(AVLNode,self).__setattr__(name,value)
 
 	def __getattribute__(self,name):
-		# if name in ['is_leaf', 'update']:
-		# 	return super(AVLNode,self).__getattribute__(name)
-		# return self[name]
 		if name in ['left', 'right', 'parent']:
 			return self[name]
 		return super(AVLNode,self).__getattribute__(name)
@@ -306,8 +291,8 @@ class AVLBeachLine(BeachLine):
 
 	def __iter__(self):
 		for node in self.T:
-			#if node.is_leaf:
-			yield node
+			if node.is_leaf:
+				yield node
 
 	def __str__(self):
 		return ' '.join([ str(x) for x in self ])

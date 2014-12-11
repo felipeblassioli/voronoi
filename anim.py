@@ -17,11 +17,13 @@ def plot_points(pts,color='red'):
 		x,y = list(x),list(y)
 	plt.plot(x,y,'o',color=color)
 
-def plot_line(*args,**kwargs):
+def plot_line(a,b,**kwargs):
 	color = kwargs.pop('color', 'blue')
-	pts = list(args)
-	hah=[list(t) for t in zip(*pts)]
-	plt.plot(hah[0],hah[1],'-', color=color)
+	x,y=[],[]
+	for p in [a,b]:
+		x.append(p[X])
+		y.append(p[Y])
+	plt.plot(x,y,'-',color=color)
 
 def plot_directrix(y,color='red'):
 	plt.plot([-10,width],[y,y],'-',color=color)
@@ -88,21 +90,45 @@ from pylab import savefig
 from fortune.geometry import intersection, circle, euclidean_distance as dist, same_point
 
 def _draw_beachline(e, beachline):
+	print beachline.T.dumps()
 	for arc in beachline:
-		if arc.is_leaf:
-			end,start=None,None
-			# plot intersections
-			if beachline.predecessor(arc):
-				start = intersection(beachline.predecessor(arc).point,arc.point,e.point[Y])
-				plt.plot(start[0],start[1],'o',color='black')
-			if beachline.sucessor(arc):
-				end = intersection(arc.point,beachline.sucessor(arc).point,e.point[Y])
-				plt.plot(end[0],end[1],'o',color='black')
-			plot_parabola(arc.point,e.point[Y],endpoints=[start,end],color='purple')
+		end,start=None,None
+		# plot intersections
+		if beachline.predecessor(arc):
+			start = intersection(beachline.predecessor(arc).point,arc.point,e.point[Y])
+			plt.plot(start[0],start[1],'o',color='black')
+		if beachline.sucessor(arc):
+			end = intersection(arc.point,beachline.sucessor(arc).point,e.point[Y])
+			plt.plot(end[0],end[1],'o',color='black')
+		plot_parabola(arc.point,e.point[Y],endpoints=[start,end],color='purple')
 
+# def _draw_hedges(e, hedges):
+# 	for h in hedges:
+# 		if h.left[Y] == h.right[Y]:
+# 			plot_vertical(h.origin[X])
+# 		else:
+# 			plot_line(h.origin, h.current(e.point[Y]), color='blue')
+# 		#print '\t', h
 def _draw_hedges(e, hedges):
 	for h in hedges:
-		plot_line(h.origin, h.current(e.point[Y]), color='blue')
+		#plot_line(h.left_site, h.right_site, color='gray')
+		
+		#plot_line(h.line2[0], h.line2[1], color='blue')
+		# i = intersection(h.left_site,h.right_site,e.point[Y])
+		# j = intersection(h.right_site,h.left_site,e.point[Y])
+		# if h._origin is not None:
+		# 	plot_line(h.vertex_from, i)
+		# 	pass
+		# else:
+		# 	plot_line(h.line[0], j)
+		#plot_line(h.vertex_from, i, color='red')
+		#plot_line(h.vertex_from, j, color='orange')
+		if h._origin:
+			plot_line(h.vertex_from(e.point[Y]), h.vertex_to(e.point[Y]), color='green')
+		else:
+			plot_line(h.vertex_from(e.point[Y]), h.vertex_to(e.point[Y]), color='blue')
+		#plot_line(h.line[0]/(h.line[0].norm), h.line[1]/(h.line[1].norm), color='green')
+		print '\t', h
 
 def _draw_circle_events(e, event_queue, past_circle_events, draw_bottoms=True, draw_circles=False, fig=None):
 	if not e.is_site:
@@ -132,7 +158,8 @@ def _draw_circle_events(e, event_queue, past_circle_events, draw_bottoms=True, d
 
 i=1
 past_circle_events = []
-def animate(self,e,draw_bottoms=True, draw_circles=False):
+from pylab import axes
+def animate(self,e,draw_bottoms=True, draw_circles=False, draw_circle_events=True):
 	global i
 	global past_circle_events
 
@@ -144,12 +171,16 @@ def animate(self,e,draw_bottoms=True, draw_circles=False):
 
 	_draw_beachline(e, self.T)
 	_draw_hedges(e, self.edges)
-	_draw_circle_events(e, self.Q, past_circle_events, draw_bottoms, draw_circles, fig)
+	if draw_circle_events:
+		_draw_circle_events(e, self.Q, past_circle_events, draw_bottoms, draw_circles, fig)
 
 	plot_directrix(e.point[Y])
 	plot_points(self.input)
 	if e.is_site:
 		plot_points([e.point], color='black')
 	
+	plt.grid(True)
+	axes().set_aspect('equal', 'datalim')
 	fig.savefig(filename, bbox_inches='tight')
+	print filename, 'beachline', self.T
 	i+=1

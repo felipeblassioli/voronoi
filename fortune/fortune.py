@@ -7,14 +7,15 @@ from .dcel import Hedge
 from .geometry import X,Y,circle, same_point
 from .beachline import LLBeachLine, AVLBeachLine
 
-
 class Voronoi(object):
 	def __call__(self, pts):
 		self.edges = []
+		self._faces = {}
+		self.vertices = []
 		self.input = pts
-		self.run(pts)
+		return self.run(pts, bounding_box=[-5,20,0,20])
 
-	def run(self, points):
+	def run(self, points, bounding_box=None):
 		"""
 		Receive a sets of points and return the voronoi diagram in a DCEL
 		Q: Event queue
@@ -31,14 +32,28 @@ class Voronoi(object):
 				self._handle_site_event(event)
 			else: 
 				self._handle_circle_event(event)
+			if bounding_box is not None:
+				for e in self.edges:
+					e.trim(*bounding_box)
 			self.animate(event)
-		
+
+		if bounding_box is not None:
+			for e in self.edges:
+				e.trim(*bounding_box)
+
 
 		#self._finish(self.root)
-		self.animate(Event((0,-100)), draw_bottoms=False)
-		edges = None
-		return edges
+		self.animate(Event((0,-100)), draw_circle_events=False)
+		return self.edges
 
+	def _create_twins(self, site1, site2):
+		half_edge = Hedge(None, None, site1, self._faces.get(site1, None))
+		half_edge._twin = Hedge(None, half_edge, site2, self._faces.get(site2, None))
+		self.edges.append(half_edge)
+		self._faces[site1] = half_edge
+		self._faces[site2] = half_edge._twin
+
+		return half_edge
 	# def finish(self):
 	# 	"""Finish the edges"""
 	# 	y = 
@@ -82,17 +97,16 @@ class Voronoi(object):
 		else:
 			# a is the arc vertically above evt.point in the beachline
 			a = self.T.search(evt.point)
+			#print 'arc above', evt, 'is', a
 			# If the arc a points to circle event, delete that event
 			if a.circle_event:
 				a.circle_event.deleted = True
 
 			x = self.T.insert(evt.point,within=a)
 			# Create edges
-			# Add new half-edges connected to i's endpoints.
-			# i->prev->s1 = i->s0 = new seg(z);
-			# i->next->s0 = i->s1 = new seg(z);
-			self.edges.append(Hedge(a.point,x.point,x.point[Y]))
-			self.edges.append(Hedge(x.point,a.point,x.point[Y]))
+			#self.edges.append(Hedge(a.point,x.point,x.point[Y]))
+			#self.edges.append(Hedge(x.point,a.point,x.point[Y]))
+			self._create_twins(x.point,a.point)
 
 			# check the triples where this new site is the far left and far right arc.
 			predecessor = self.T.predecessor(x)
@@ -122,13 +136,28 @@ class Voronoi(object):
  		"""
  		if not evt.deleted:
  			# Step 1
- 			for h in self.edges:
- 				if same_point(h.current(evt.point[Y]), evt.center):
- 					h.finish(evt.center)
+ 			# for h in self.edges:
+ 			# 	if same_point(h.current(evt.point[Y]), evt.center):
+ 			# 		h.finish(evt.center)
 
- 			
+ 			# new hedge
+ 			#h = Hedge(self.T.predecessor(evt.arc).point, self.T.sucessor(evt.arc).point, evt.point[Y])
+ 			#self.edges.append(h)
+ 			self.vertices.append(evt.center)
+ 			print 'new HE for ', self.T.predecessor(evt.arc), self.T.sucessor(evt.arc), self.T.predecessor(evt.arc).point, self.T.sucessor(evt.arc).point
+ 			new_half_edge = self._create_twins(self.T.sucessor(evt.arc).point, self.T.predecessor(evt.arc).point)
+ 			#new_half_edge = self._create_twins(self.T.sucessor(evt.arc).point, self.T.sucessor(evt.arc).point)
+ 			new_half_edge._origin = evt.center
 
- 			self.edges.append(Hedge(self.T.predecessor(evt.arc).point, self.T.sucessor(evt.arc).point, evt.point[Y]))
+ 			for left, right in ((self.T.predecessor(evt.arc).point, evt.arc.point),
+ 								(evt.arc.point, self.T.sucessor(evt.arc).point)):
+ 				half_edge = None
+ 				for he in self._faces[left]._iter_neighbours():
+ 					if he._twin._site == right:
+ 						half_edge = he
+ 						break
+ 				print 'updating', half_edge
+ 				half_edge._origin = evt.center
  			#remove possible circle events involving this site'
  			x = evt.arc
  			for e in self.Q:
@@ -143,10 +172,6 @@ class Voronoi(object):
  			
 			self.check_circle(predecessor, evt.point[Y])
  			self.check_circle(sucessor, evt.point[Y])
-
- 			
- 		else:
- 			print 'Event already deleted'
 
  	def _check_circle(self, predecessor, arc, sucessor, y):
  		 # We need a triple of arcs.

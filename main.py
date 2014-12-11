@@ -12,14 +12,14 @@ if __name__ == '__main__':
 	# y = [12,3,6]
 	# label = ['a','b','c']parabola = (a,b,c)
 
-	# Three colinear points
+	#Three colinear points
 	# x = [10,5,0]
 	# y = [11,11,11]
 	# label = ['b','c','a']
 
 	# Two colinear points
 	# x = [8,11,13]
-	# y = [11,11,9]
+	# y = [11,9,9]
 	# label = ['b','c','d']
 
 	#Three colinear points
@@ -33,4 +33,7 @@ if __name__ == '__main__':
 	pts = zip(x,y,label)
 	edges = v(pts)
 
-	print edges	
+	print '\nEdges:'
+	for e in edges:
+		print '\t', e
+	#print edges	
