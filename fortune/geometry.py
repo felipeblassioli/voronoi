@@ -1,7 +1,7 @@
 from math import sqrt
 
 X,Y=0,1
-
+INFINITY = 9999
 
 def _point(x,a,b,c):
 	return (x, a*(x**2)+b*x+c)
@@ -51,9 +51,20 @@ def intersection(p,q,directrix):
 	a,b,c = coefficients(p,directrix)
 	d,e,f = coefficients(q,directrix)
 
+	# print 'intersection', p,q,directrix
+	# print '\t',a,b,c
+	# print '\t',d,e,f
+
 	if p[Y] == q[Y]:
 		x = (p[X] + q[X]) / 2.0
-		return x,p[Y]
+		# Fucking degenerated cases: WE need help from hedge.vertex_from to to deal with this
+		if p[X] > q[X]:
+			return INFINITY,INFINITY
+		if p[Y] == directrix:
+			return x, directrix
+		parabola = (a,b,c)
+		#return x,directrix
+		#return None
 	elif q[Y] == directrix:
 		x = q[X]
 		parabola = (a,b,c)
@@ -80,13 +91,14 @@ def circle(a,b,c):
 	G = 2.0*(A*(c[Y]-b[Y]) - B*(c[X]-b[X]))
 
 	# Points are co-linear and not finite radius exists
-	if G == 0: return None, None
+	if G == 0: return None
 
 	center = (D*E-B*F)/G, (A*F-C*E)/G;
 	radius = sqrt((a[X] - center[X])**2 + (a[Y] - center[Y])**2)
 	bottom = center[X], center[Y] - radius
 
-	return bottom, center
+	#return bottom, center
+	return center, radius
 
 def euclidean_distance(p,q):
 	return sqrt( (p[X] - q[X])**2 + (p[Y]-q[Y])**2 )
@@ -95,3 +107,58 @@ def same_point(p,q,epsilon=0.00001):
 	_eq = lambda a, b, t: abs(a - b) < t
 
 	return _eq(p[X],q[X],epsilon) and _eq(p[Y],q[Y], epsilon)
+
+from collections import namedtuple
+from math import sqrt
+_Point = namedtuple('Point', ['x', 'y', 'label'])
+class Point(_Point):
+	"""A point in the plane
+
+	Attributes:
+	x: float, the x coordinate
+	y: float, the y coordinate
+
+	Properties:
+	square: float, the square of the norm of the vector (x, y)
+	norm: float, the norm of the vector (x, y)
+	"""
+	def __new__(_cls, x, y, label=None):
+		'Create a new instance of Point(x, y)'
+		return _Point.__new__(_cls, x, y, label)
+
+	def __repr__(self):
+		if self.label is not None:
+			return "%s(%r, %r, %r)" % (self.__class__.__name__, self.x, self.y, self.label)
+		return "%s(%r, %r)" % (self.__class__.__name__, self.x, self.y)
+
+	def __add__(self, other):
+		return self.__class__(self.x + other.x, self.y + other.y)
+
+	def __neg__(self):
+		return self.__class__(-self.x, -self.y)
+
+	def __sub__(self, other):
+		return self + (-other)
+
+	def __div__(self, other):
+		return self.__class__(self.x / other, self.y / other)
+
+	def __cmp__(self, other):
+		if other is None:
+			return False
+			
+		cmp_x = cmp(self.x, other.x)
+		if cmp_x != 0:
+			return cmp_x
+		return cmp(self.y, other.y)
+
+	def __abs__(self):
+		return self.norm
+
+	@property
+	def square(self):
+		return self.x**2 + self.y**2
+
+	@property
+	def norm(self):
+		return sqrt(self.square)

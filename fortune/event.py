@@ -1,98 +1,117 @@
 # -*- coding: utf-8 -*-
-from .geometry import X,Y
+from heapq import heappush, heappop, heapify
 
-from collections import namedtuple
-from math import sqrt
-_Point = namedtuple('Point', ['x', 'y', 'label'])
-class Point(_Point):
-	"""A point in the plane
+from . import log
+from .geometry import Point
 
-	Attributes:
-	x: float, the x coordinate
-	y: float, the y coordinate
+class EventQueue(object):
+	def __init__(self, points):
+		# We remove duplicates (This is a degenerate case)
+		seen = set()
+		seen_add = seen.add
+		self.events = [ SiteEvent(p) for p in points if not (p in seen or seen_add(p))]
+		heapify(self.events)
 
-	Properties:
-	square: float, the square of the norm of the vector (x, y)
-	norm: float, the norm of the vector (x, y)
-	"""
-	def __new__(_cls, x, y, label=None):
-		'Create a new instance of Point(x, y)'
-		return _Point.__new__(_cls, x, y, label)
+		# for debugging only:
+		labels = 'abcdefghijklmnopqrstuvxwyz'
+		if len(self.events) <= len(labels):
+			self.events = [ SiteEvent(Point(evt.site.x, evt.site.y, labels[i])) for i, evt in enumerate(self.events) ]
 
-	def __repr__(self):
-		return "%s(%r, %r)" % (self.__class__.__name__, self.x, self.y)
 
-	def __add__(self, other):
-		return self.__class__(self.x + other.x, self.y + other.y)
+	def push(self,evt):
+		heappush(self.events, evt)
 
-	def __neg__(self):
-		return self.__class__(-self.x, -self.y)
-
-	def __sub__(self, other):
-		return self + (-other)
-
-	def __div__(self, other):
-		return self.__class__(self.x / other, self.y / other)
-
-	def __cmp__(self, other):
-		cmp_x = cmp(self.x, other.x)
-		if cmp_x != 0:
-			return cmp_x
-		return cmp(self.y, other.y)
-
-	def __abs__(self):
-		return self.norm
-
-	@property
-	def square(self):
-		return self.x**2 + self.y**2
-
-	@property
-	def norm(self):
-		return sqrt(self.square)
-
-class Event(object):
-	"""The priority of an event is determined by when the sweep line will encounter it.  
-	There are two kinds of events:
-	- Site Events:
-	  Site events would be given a higher priority if they have a larger y-coordinate (assuming y increases in the upward direction)
-	- Circle Events:
-	  Circle events would be given a higher priority if they have a larger y-coordinate of the sweep line as it just grazes the bottom 
-	  of the circle corresponding to the circle event.
-
-	  Site event we store the site itself.
-	  For a circle event we store is the lowest point of the circle, with a pointer to the leaft in T that represents the arc that will disappear
-	"""
-
-	def __init__(self, point):
-		if len(point) < 3:
-			self.point = Point(point[X], point[Y], None)
-		else:
-			self.point = Point(point[X], point[Y], point[2])
-		
-		self.is_site = True
+	def pop(self):
+		return heappop(self.events)
 
 	def __repr__(self):
-		return str(self)
+		return str(self.events)
 
-	def __str__(self):
-		return "Event(point={},is_site={})".format(self.point,self.is_site)
+	def __iter__(self):
+		for x in self.events:
+			yield x
 
-	def __cmp__(self, other):
-		assert isinstance(other,Event)
-		c = cmp(other.point[Y],self.point[Y])
-		if c == 0:
-			return cmp(self.point[X], other.point[X])
-		else:
-			return c
+	@property
+	def is_empty(self):
+		return len(self.events) == 0
 
-class CircleEvent(Event):
-	def __init__(self, point, arc, center):
-		super(CircleEvent,self).__init__(point)
+class FortuneEvent(object):
+
+    def __cmp__(self, other):
+    	if other is None:
+    		return False
+        c = cmp(other.y, self.y)
+        if c == 0:
+        	return cmp(self.x,other.x)
+        return c
+
+    @property
+    def y(self):
+        raise NotImplementedError()
+
+    @property
+    def is_site(self):
+        return isinstance(self,SiteEvent)
+
+class SiteEvent(FortuneEvent):
+
+    def __init__(self, site):
+    	if type(site) == tuple:
+    		self.site = Point(*site)
+    	else:
+        	self.site = site
+
+    def __repr__(self):
+        return u"SiteEvent at y=%s" % self.y
+
+    @property
+    def y(self):
+        return self.site.y
+
+    @property
+    def x(self):
+    	return self.site.x
+    	
+class CircleEvent(FortuneEvent):
+
+	def __init__(self, arc, circle):
 		self.arc = arc
-		self.center = center
-		self.is_site = False
-		self.deleted = False
+		center, radius = circle
+		self.circle = (Point(*center), radius)
+		arc.circle_event = self
 
-	def __str__(self):
-		return "CircleEvent(point={},arc={},deleted={})".format(self.point,self.arc,self.deleted)
+		log('\t\t\t Detected: %s ' % self)
+
+	@property
+	def x(self):
+		return self.bottom.x
+
+	@property
+	def y(self):
+		(center, radius) = self.circle
+		return center.y - radius
+
+	@property
+	def is_valid(self):
+		if self.arc.circle_event is None:
+			return False
+		return self.arc.circle_event == self
+
+	@property
+	def radius(self):
+		return self.circle[1]
+
+	@property
+	def center(self):
+		return self.circle[0]
+
+	@property
+	def bottom(self):
+		return Point(self.center.x, self.center.y - self.radius)
+
+	def __repr__(self):
+		return u"CircleEvent at y=%s center is %s arc is %s" % (self.y, self.center, self.arc)
+
+	# @property
+	# def is_site(self):
+	# 	return False

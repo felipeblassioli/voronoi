@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from .geometry import intersection
 
-from event import Point
+from geometry import intersection, Point, INFINITY
 class Hedge(object):
     """An half-edge of the resulting graph.
 
@@ -53,17 +52,22 @@ class Hedge(object):
     def right_site(self):
         return self._twin._site
 
-    from .geometry import intersection
+    from geometry import intersection
     def vertex_from(self,y):
         if self._origin is not None:
             return self._origin
         i = intersection(self.left_site, self.right_site, y)
+        # they are collinear
+        if i[1] == INFINITY and i[0] == INFINITY:
+            x = (self.left_site.x + self.right_site.x) / 2.0
+            return Point(x,INFINITY)
         return Point(i[0],i[1])
         #return self._cut_origin
 
     def vertex_to(self,y):
         if self._origin is not None:
-            print 'hi', self, 'to', self._twin
+        	pass
+            #print 'hi', self, 'to', self._twin
             #return intersection(self.left_site, self.right_site, y)
         return self._twin.vertex_from(y)
 
@@ -88,23 +92,3 @@ class Hedge(object):
                 assert x_min <= _x <= x_max
                 setattr(obj, '_cut_origin', Point(_x, y_limit))
 
-	# def __init__(self,p,q,y):
-	# 	self.left = p
-	# 	self.right = q
-	# 	self.end = None
-	# 	self.origin = self.current(y)
-
-	# def current(self,directrix):
-	# 	if self.end:
-	# 		return self.end
-	# 	return intersection(self.left,self.right,directrix)
-
-	# def finish(self, p):
-	# 	if self.end is None:
-	# 		self.end = p
-
-	# def __str__(self):
-	# 	return 'Hedge(left={}, right={}, origin={}, end={})'.format(self.left,self.right,self.origin, self.end)
-
-	# def __repr__(self):
-	# 	return str(self)

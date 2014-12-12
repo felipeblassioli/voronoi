@@ -36,7 +36,7 @@ import pylab
 
 
 
-from fortune.geometry import vertex, coefficients
+from geometry import vertex, coefficients
 def parabola (list_x, focus, directrix):
 	A,B,C = coefficients(focus,directrix)
 	if A == 0:
@@ -87,35 +87,38 @@ def plot_parabola(focus,directrix, endpoints=None,pts=pylab.linspace(-10, width,
 
 from matplotlib import pyplot as plt
 from pylab import savefig
-from fortune.geometry import intersection, circle, euclidean_distance as dist, same_point
+from geometry import intersection, circle, euclidean_distance as dist, same_point
 
 def _draw_beachline(e, beachline):
-	print beachline.T.dumps()
+	#print beachline.T.dumps()
 	for arc in beachline:
 		end,start=None,None
 		# plot intersections
 		if beachline.predecessor(arc):
-			start = intersection(beachline.predecessor(arc).point,arc.point,e.point[Y])
+			#print 'waaat', type(beachline.predecessor(arc))
+			start = intersection(beachline.predecessor(arc).site,arc.site,e.y)
 			plt.plot(start[0],start[1],'o',color='black')
 		if beachline.sucessor(arc):
-			end = intersection(arc.point,beachline.sucessor(arc).point,e.point[Y])
+
+			#print 'waaat', type(beachline.sucessor(arc))
+			end = intersection(arc.site,beachline.sucessor(arc).site,e.y)
 			plt.plot(end[0],end[1],'o',color='black')
-		plot_parabola(arc.point,e.point[Y],endpoints=[start,end],color='purple')
+		plot_parabola(arc.site,e.y,endpoints=[start,end],color='purple')
 
 # def _draw_hedges(e, hedges):
 # 	for h in hedges:
 # 		if h.left[Y] == h.right[Y]:
 # 			plot_vertical(h.origin[X])
 # 		else:
-# 			plot_line(h.origin, h.current(e.point[Y]), color='blue')
+# 			plot_line(h.origin, h.current(e.y), color='blue')
 # 		#print '\t', h
 def _draw_hedges(e, hedges):
 	for h in hedges:
 		#plot_line(h.left_site, h.right_site, color='gray')
 		
 		#plot_line(h.line2[0], h.line2[1], color='blue')
-		# i = intersection(h.left_site,h.right_site,e.point[Y])
-		# j = intersection(h.right_site,h.left_site,e.point[Y])
+		# i = intersection(h.left_site,h.right_site,e.y)
+		# j = intersection(h.right_site,h.left_site,e.y)
 		# if h._origin is not None:
 		# 	plot_line(h.vertex_from, i)
 		# 	pass
@@ -124,31 +127,33 @@ def _draw_hedges(e, hedges):
 		#plot_line(h.vertex_from, i, color='red')
 		#plot_line(h.vertex_from, j, color='orange')
 		if h._origin:
-			plot_line(h.vertex_from(e.point[Y]), h.vertex_to(e.point[Y]), color='green')
+			plot_line(h.vertex_from(e.y), h.vertex_to(e.y), color='green')
 		else:
-			plot_line(h.vertex_from(e.point[Y]), h.vertex_to(e.point[Y]), color='blue')
+			plot_line(h.vertex_from(e.y), h.vertex_to(e.y), color='blue')
 		#plot_line(h.line[0]/(h.line[0].norm), h.line[1]/(h.line[1].norm), color='green')
 		#print '\t', h
 
-def _draw_circle_events(e, event_queue, past_circle_events, draw_bottoms=True, draw_circles=False, fig=None):
+def _draw_circle_events(e, event_queue, past_circle_events, draw_bottoms=True, draw_circles=False, fig=None, draw_past_circles=False):
 	if not e.is_site:
-		bottom, center = e.point, e.center
-		radius = dist(center,bottom)
+		bottom, center, radius = e.bottom, e.center, e.radius
+		#radius = dist(center,bottom)
 		circle=plt.Circle(center,radius,color='b',fill=False)
 		fig.gca().add_artist(circle)
 
 		past_circle_events.append(e)
+		plot_points([bottom], color='green')
 
-	for e in past_circle_events:
-		plot_points([e.point], color='green')
+	if draw_past_circles:
+		for e in past_circle_events:
+			plot_points([e.bottom], color='green')
 
 	for evt in event_queue:
 		# Circle Event
-		if not evt.is_site:
-			bottom, center = evt.point, evt.center
-			#if same_point(evt.point, e.point):
+		if not evt.is_site and evt.is_valid:
+			bottom, center = evt.bottom, evt.center
+			#if same_point(evt.site, e.site):
 			if draw_circles:
-				radius = dist(center,bottom)
+				radius = evt.radius
 				circle=plt.Circle(center,radius,color='b',fill=False)
 				fig.gca().add_artist(circle)
 
@@ -159,28 +164,32 @@ def _draw_circle_events(e, event_queue, past_circle_events, draw_bottoms=True, d
 i=1
 past_circle_events = []
 from pylab import axes
+import voronoi
 def animate(self,e,draw_bottoms=True, draw_circles=False, draw_circle_events=True):
 	global i
 	global past_circle_events
 
 	filename = 'tmp-{0:03}.png'.format(i)
+	#print 'animate', e, type(e), isinstance(e,voronoi.SiteEvent), isinstance(e,voronoi.CircleEvent)
 	plt.clf()
 	fig = plt.gcf()
 	# plt.axis([0,width, 0, height])
-	plt.axis([-5,15, -5, 15])
+	if self.bounding_box is not None:
+		plt.axis(self.bounding_box)
+	#plt.axis([-5,25, -5, 25])
 
 	_draw_beachline(e, self.T)
 	_draw_hedges(e, self.edges)
 	if draw_circle_events:
 		_draw_circle_events(e, self.Q, past_circle_events, draw_bottoms, draw_circles, fig)
 
-	plot_directrix(e.point[Y])
+	plot_directrix(e.y)
 	plot_points(self.input)
 	if e.is_site:
-		plot_points([e.point], color='black')
+		plot_points([e.site], color='black')
 	
 	plt.grid(True)
 	axes().set_aspect('equal', 'datalim')
 	fig.savefig(filename, bbox_inches='tight')
-	print filename, 'beachline', self.T
+	print filename, 'beachline', self.T, 'Input:', self.input
 	i+=1

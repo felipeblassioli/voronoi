@@ -13,6 +13,7 @@ class Voronoi(object):
 		self._faces = {}
 		self.vertices = []
 		self.input = pts
+		print 'input is ', pts
 		return self.run(pts, bounding_box=[-5,20,0,20])
 
 	def run(self, points, bounding_box=None):
@@ -32,9 +33,6 @@ class Voronoi(object):
 				self._handle_site_event(event)
 			else: 
 				self._handle_circle_event(event)
-			if bounding_box is not None:
-				for e in self.edges:
-					e.trim(*bounding_box)
 			self.animate(event)
 
 		if bounding_box is not None:
@@ -99,13 +97,12 @@ class Voronoi(object):
 			a = self.T.search(evt.point)
 			#print 'arc above', evt, 'is', a
 			# If the arc a points to circle event, delete that event
-			if a.circle_event:
+			if a.circle_event is not None:
+				print 'False alarm'
 				a.circle_event.deleted = True
 
 			x = self.T.insert(evt.point,within=a)
 			# Create edges
-			#self.edges.append(Hedge(a.point,x.point,x.point[Y]))
-			#self.edges.append(Hedge(x.point,a.point,x.point[Y]))
 			self._create_twins(x.point,a.point)
 
 			# check the triples where this new site is the far left and far right arc.
@@ -135,11 +132,7 @@ class Voronoi(object):
  		Source: http://cgm.cs.mcgill.ca/~mcleish/644/Projects/DerekJohns/Sweep.htm#SweepAlgorithm
  		"""
  		if not evt.deleted:
- 			# Step 1
- 			# for h in self.edges:
- 			# 	if same_point(h.current(evt.point[Y]), evt.center):
- 			# 		h.finish(evt.center)
-
+ 			print 'delete arc ', evt.arc, id(evt.arc)
  			# new hedge
  			#h = Hedge(self.T.predecessor(evt.arc).point, self.T.sucessor(evt.arc).point, evt.point[Y])
  			#self.edges.append(h)
@@ -157,21 +150,32 @@ class Voronoi(object):
  						half_edge = he
  						break
  				print 'updating', half_edge
- 				half_edge._origin = evt.center
+ 				if half_edge:
+ 					half_edge._origin = evt.center
  			#remove possible circle events involving this site'
  			x = evt.arc
  			for e in self.Q:
  				if not e.is_site:
  					if e.arc.point == evt.arc.point:
+ 						print 'deleting', self.T.predecessor(e.arc),  self.T.sucessor(e.arc),'vs', self.T.predecessor(evt.arc), self.T.sucessor(evt.arc), evt.arc, 'is at', id(evt.arc), evt.arc.circle_event
  						e.deleted = True
 
 			predecessor = self.T.predecessor(x)
 			sucessor = self.T.sucessor(x)
  			self.T.delete(evt.arc)
 
+ 			# if self.T.predecessor(x) is not None and self.T.predecessor(x).circle_event is not None:
+ 			# 	print 'DELETE THIS SHIT', self.T.predecessor(x).circle_event
+ 			# 	self.T.predecessor(x).circle_event.deleted = True
+ 			# if self.T.sucessor(x) is not None and self.T.sucessor(x).circle_event is not None:
+ 			# 	print 'DELETE THIS SHIT', self.T.sucessor(x).circle_event
+ 			# 	self.T.sucessor(x).circle_event.deleted = True
+
  			
 			self.check_circle(predecessor, evt.point[Y])
  			self.check_circle(sucessor, evt.point[Y])
+ 		else:
+ 			print 'DELETED', evt.arc, id(evt.arc)
 
  	def _check_circle(self, predecessor, arc, sucessor, y):
  		 # We need a triple of arcs.
@@ -181,6 +185,7 @@ class Voronoi(object):
  		bottom, center = circle(predecessor.point, arc.point, sucessor.point)
  		if center and bottom[Y] < y:
  			if abs(bottom[Y] - y) < 0.0001: return
+ 			print 'DETECTED', predecessor, arc, sucessor, ' arc is at', id(arc), 'bottom is', bottom
  			arc.circle_event = CircleEvent(bottom,arc,center)
  			heappush(self.Q, arc.circle_event)
 

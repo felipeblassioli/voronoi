@@ -1,3 +1,9 @@
 # -*- coding: utf-8 -*-
-from .geometry import *
-from .fortune import *
+
+DEBUG = True
+
+def log(s):
+    if DEBUG:
+        print s
+
+from .voronoi import VoronoiDiagram
