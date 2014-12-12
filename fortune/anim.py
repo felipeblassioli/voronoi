@@ -71,67 +71,54 @@ def plot_parabola(focus,directrix, endpoints=None,pts=pylab.linspace(-10, width,
 	else:
 		start = endpoints[0][X] if endpoints[0] is not None else -10
 		end = endpoints[1][X] if endpoints[1] is not None else width
+		#print '\tplot focus', focus, start,end
 		if start != -10:
 			pts = pylab.linspace(-10,start,num=240)
+			#print '\t\tstart: -10 to ',start
 			plt.plot(pts, parabola(pts,f,directrix), '-',color='#e3e3e3',linewidth=1)
 
 		if end != width:
 			pts = pylab.linspace(end,width,num=240)
+			#print '\t\tend: ',end,'to',width
 			plt.plot(pts, parabola(pts,f,directrix), '-',color='#e3e3e3',linewidth=1)
 
 		pts = pylab.linspace(start,end,num=240)
 		plt.plot(pts, parabola(pts,f,directrix), '-',color=color,linewidth=2)
-		#parabolas.append(parabola(pts,f,directrix))
-		# Plot a vertical line that has the focus
-	#plt.plot([a,a],[0,height],'b-',color=c)
 
 from matplotlib import pyplot as plt
 from pylab import savefig
-from geometry import intersection, circle, euclidean_distance as dist, same_point
+from geometry import INFINITY, intersection, circle, euclidean_distance as dist, same_point
 
 def _draw_beachline(e, beachline):
+	isInfinity = lambda x: x is not None and x[0] == INFINITY and x[1] == INFINITY
 	#print beachline.T.dumps()
 	for arc in beachline:
 		end,start=None,None
-		# plot intersections
-		if beachline.predecessor(arc):
-			#print 'waaat', type(beachline.predecessor(arc))
-			start = intersection(beachline.predecessor(arc).site,arc.site,e.y)
-			plt.plot(start[0],start[1],'o',color='black')
-		if beachline.sucessor(arc):
-
-			#print 'waaat', type(beachline.sucessor(arc))
-			end = intersection(arc.site,beachline.sucessor(arc).site,e.y)
-			plt.plot(end[0],end[1],'o',color='black')
+		pred,suc = beachline.predecessor(arc), beachline.sucessor(arc)
+		#print pred, arc, suc
+		if pred is not None:
+			start = intersection(pred.site,arc.site,e.y)
+			# if start[X] == INFINITY and start[Y] == INFINITY:
+			# 	start = None
+		if suc is not None:
+			end = intersection(arc.site,suc.site,e.y)
+			# if end[X] == INFINITY and end[Y] == INFINITY:
+			# 	end = None
+		if isInfinity(start) and isInfinity(end) or isInfinity(start) and end is None:
+			continue
+		elif isInfinity(start):
+			start = None
+		elif isInfinity(end):
+			end = None
+		# print 'arc is',arc, 'intersections are',start,end, 'pred/suc', beachline.predecessor(arc),beachline.sucessor(arc)
 		plot_parabola(arc.site,e.y,endpoints=[start,end],color='purple')
 
-# def _draw_hedges(e, hedges):
-# 	for h in hedges:
-# 		if h.left[Y] == h.right[Y]:
-# 			plot_vertical(h.origin[X])
-# 		else:
-# 			plot_line(h.origin, h.current(e.y), color='blue')
-# 		#print '\t', h
 def _draw_hedges(e, hedges):
 	for h in hedges:
-		#plot_line(h.left_site, h.right_site, color='gray')
-		
-		#plot_line(h.line2[0], h.line2[1], color='blue')
-		# i = intersection(h.left_site,h.right_site,e.y)
-		# j = intersection(h.right_site,h.left_site,e.y)
-		# if h._origin is not None:
-		# 	plot_line(h.vertex_from, i)
-		# 	pass
-		# else:
-		# 	plot_line(h.line[0], j)
-		#plot_line(h.vertex_from, i, color='red')
-		#plot_line(h.vertex_from, j, color='orange')
 		if h._origin:
 			plot_line(h.vertex_from(e.y), h.vertex_to(e.y), color='green')
 		else:
 			plot_line(h.vertex_from(e.y), h.vertex_to(e.y), color='blue')
-		#plot_line(h.line[0]/(h.line[0].norm), h.line[1]/(h.line[1].norm), color='green')
-		#print '\t', h
 
 def _draw_circle_events(e, event_queue, past_circle_events, draw_bottoms=True, draw_circles=False, fig=None, draw_past_circles=False):
 	if not e.is_site:

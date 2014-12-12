@@ -234,7 +234,8 @@ class AVLBeachLine(BeachLine):
 
 	def delete(self, arc):
 		# find internal nodes
-		log('\t\t\t deleting %s' % arc)
+		log('\t\t\t deleting %s original intree: %s' % (arc, self.T))
+		#print '\t\t\tparent is', arc.parent, arc.left, arc.right
 		
 		pred = self.T.predecessor(arc)
 		suc = self.T.sucessor(arc)
@@ -265,6 +266,7 @@ class AVLBeachLine(BeachLine):
 				grandpa.right = pa.right
 			pred.q = rsib.p
 		log('\t\t\t\tsiblings: %s %s' % (lsib,rsib))
+		arc.circle_event = None
 		return lsib, rsib
 
 
