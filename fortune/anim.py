@@ -116,7 +116,7 @@ def _draw_beachline(e, beachline):
 def _draw_hedges(e, hedges):
 	for h in hedges:
 		if h._origin:
-			plot_line(h.vertex_from(e.y), h.vertex_to(e.y), color='green')
+			plot_line(h.vertex_from(e.y), h.vertex_to(e.y), color='blue')
 		else:
 			plot_line(h.vertex_from(e.y), h.vertex_to(e.y), color='blue')
 
@@ -156,7 +156,7 @@ def animate(self,e,draw_bottoms=True, draw_circles=False, draw_circle_events=Tru
 	global i
 	global past_circle_events
 
-	filename = 'tmp-{0:03}.ppm'.format(i)
+	filename = 'tmp-{0:03}.png'.format(i)
 	#print 'animate', e, type(e), isinstance(e,voronoi.SiteEvent), isinstance(e,voronoi.CircleEvent)
 	plt.clf()
 	fig = plt.gcf()
