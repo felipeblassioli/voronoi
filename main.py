@@ -56,7 +56,15 @@ if __name__ == '__main__':
 		
 	]
 
+	for i, pts in enumerate(selected_runs):
+		filename = 'run-%03d.pts' % i
+		with open(filename, 'w') as f:
+			for p in pts:
+				f.write('%d %d\n' % (p[0],p[1])) 
+
+	exit(1)
 	selected_runs.extend(degenerate_runs)
+
 
 	#selected_runs = [[(8,11),(14,11),(20,11),(26,11),(8,6),(14,6),(20,6),(26,6)]]
 	#selected_runs = [[(8,11),(14,11),(20,11),(8,6),(14,6),(20,6)],]
@@ -65,15 +73,15 @@ if __name__ == '__main__':
 	# pts = zip(x,y,label)
 
 	VoronoiDiagram.animate = animate
-	pts = selected_runs[-1]
-	v = VoronoiDiagram(pts,bounding_box=bbox)
-	exit(1)
+	# pts = selected_runs[-1]
+	# v = VoronoiDiagram(pts,bounding_box=bbox)
+	# exit(1)
 	# for pts in selected_runs:
 	# 	v = VoronoiDiagram(pts,bounding_box=bbox, step_by_step=False)
-	for i in range(1,25):
-		x = [ randint(0,20) for i in range(1,20)]
-		y = [ randint(0,20) for i in range(1,20)]
-		pts = zip(x,y)
-		v = VoronoiDiagram(pts,bounding_box=bbox, step_by_step=False)
+	# for i in range(1,50):
+	# 	x = [ randint(0,20) for i in range(1,20)]
+	# 	y = [ randint(0,20) for i in range(1,20)]
+	# 	pts = zip(x,y)
+	# 	v = VoronoiDiagram(pts,bounding_box=bbox, step_by_step=False)
 
 	

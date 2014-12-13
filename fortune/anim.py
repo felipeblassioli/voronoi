@@ -156,7 +156,7 @@ def animate(self,e,draw_bottoms=True, draw_circles=False, draw_circle_events=Tru
 	global i
 	global past_circle_events
 
-	filename = 'tmp-{0:03}.png'.format(i)
+	filename = 'tmp-{0:03}.ppm'.format(i)
 	#print 'animate', e, type(e), isinstance(e,voronoi.SiteEvent), isinstance(e,voronoi.CircleEvent)
 	plt.clf()
 	fig = plt.gcf()

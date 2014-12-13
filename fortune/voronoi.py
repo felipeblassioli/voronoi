@@ -19,7 +19,6 @@ class VoronoiDiagram(object):
 		self.Q = EventQueue(points)
 		
 		# treat degeneracies
-		prev = None
 		log('EventQueue: %s' % str(self.Q))
 		while not self.Q.is_empty:
 			event = self.Q.pop()
@@ -27,21 +26,16 @@ class VoronoiDiagram(object):
 			if isinstance(event, SiteEvent):
 				log('_handle_site_event')
 				self._handle_site_event(event)
-
-				if step_by_step:
-					self.animate(event, draw_bottoms=False)
 			else:
 				log('_handle_circle_event')
-				if event != prev or True:
-					self._handle_circle_event(event)
-					if step_by_step and event.is_valid:
-						self.animate(event, draw_bottoms=False)
-			prev = event
+				self._handle_circle_event(event)
+			if step_by_step:
+				self.animate(event, draw_bottoms=False)
 
 			log('%s' % self.T.T.dumps())
 			log('beachline: %s' % self.T)
 			log('-----')
-		self.animate(SiteEvent((0,-100)), draw_circle_events=False)
+		self.animate(SiteEvent((0,-9999)), draw_circle_events=False)
 		
 
 	def _handle_site_event(self, evt):
