@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-DEBUG = False
+DEBUG = True
 
 def log(s):
     if DEBUG:

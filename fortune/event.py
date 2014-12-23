@@ -80,7 +80,7 @@ class CircleEvent(FortuneEvent):
 		self.circle = (Point(*center), radius)
 		arc.circle_event = self
 
-		log('\t\t\tDetected: %s arc is %s with parent %s left/right %s/%s' % (self,self.arc, self.arc.parent,self.arc.left,self.arc.right))
+		log('\t\t\t Detected: %s ' % self)
 
 	@property
 	def x(self):
@@ -110,7 +110,7 @@ class CircleEvent(FortuneEvent):
 		return Point(self.center.x, self.center.y - self.radius)
 
 	def __repr__(self):
-		return u"CircleEvent at y=%s center is %s arc is %s with parent %s left/right %s/%s" % (self.y, self.center, self.arc, self.arc.parent,self.arc.left,self.arc.right)
+		return u"CircleEvent at y=%s center is %s arc is %s" % (self.y, self.center, self.arc)
 
 	# @property
 	# def is_site(self):

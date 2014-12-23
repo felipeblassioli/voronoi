@@ -57,10 +57,8 @@ class Hedge(object):
         if self._origin is not None:
             return self._origin
         i = intersection(self.left_site, self.right_site, y)
-        #print 'intersection of', self.left_site, self.right_site, 'is', i
         # they are collinear
         if i[1] == INFINITY and i[0] == INFINITY:
-            #print '\thi'
             x = (self.left_site.x + self.right_site.x) / 2.0
             return Point(x,INFINITY)
         return Point(i[0],i[1])

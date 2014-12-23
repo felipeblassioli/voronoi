@@ -8,7 +8,7 @@ if __name__ == '__main__':
 	bbox = [-5,35,-5,35]
 
 	VoronoiDiagram.animate = animate
-	for i in range(1,50):
+	for i in range(1,3):
 		x = [ randint(0,20) for i in range(1,20)]
 		y = [ randint(0,20) for i in range(1,20)]
 		pts = zip(x,y)

@@ -18,7 +18,6 @@ class VoronoiDiagram(object):
 		self.T = AVLBeachLine()
 		self.Q = EventQueue(points)
 		
-		# treat degeneracies
 		log('EventQueue: %s' % str(self.Q))
 		while not self.Q.is_empty:
 			event = self.Q.pop()
@@ -35,7 +34,7 @@ class VoronoiDiagram(object):
 			log('%s' % self.T.T.dumps())
 			log('beachline: %s' % self.T)
 			log('-----')
-		self.animate(SiteEvent((0,-9999)), draw_circle_events=False)
+		self.animate(SiteEvent((0,-100)), draw_circle_events=False)
 		
 
 	def _handle_site_event(self, evt):

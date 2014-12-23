@@ -72,13 +72,9 @@ def intersection(p,q,directrix):
 		x = p[X]
 		parabola = (d,e,f)
 	else:
-		if a == d:
-			#print 'Houston we got a problem'
-			x = (f-c)/(b-e)
-		else:
-			sols = solve(a-d,b-e,c-f) 
-			# we get the rightmost point
-			x = sols[0]
+		sols = solve(a-d,b-e,c-f) 
+		# we get the rightmost point
+		x = sols[0]
 		parabola = (a,b,c)
 	# plug-back the results in the parabola
 	return _point(x,*parabola)
